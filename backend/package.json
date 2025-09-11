@@ -9,6 +9,8 @@
         "prisma:generate": "prisma generate",
         "prisma:migrate": "prisma migrate dev",
         "prisma:studio": "prisma studio",
+        "prisma:seed": "ts-node --project tsconfig.scripts.json prisma/seed.ts",
+        "prisma:reset": "prisma migrate reset --force",
         "lint": "eslint src/**/*.ts --cache",
         "format": "prettier --write src --no-editorconfig --log-level silent",
         "check": "prettier --check src --no-editorconfig",
