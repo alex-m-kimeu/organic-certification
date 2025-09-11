@@ -1,0 +1,41 @@
+{
+    "name": "organic-certification-backend",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/server.js",
+        "dev": "nodemon src/server.ts",
+        "prisma:generate": "prisma generate",
+        "prisma:migrate": "prisma migrate dev",
+        "prisma:studio": "prisma studio",
+        "lint": "eslint src/**/*.ts --cache",
+        "format": "prettier --write src --no-editorconfig --log-level silent",
+        "check": "prettier --check src --no-editorconfig",
+        "lint-fix": "npm run lint -- --fix",
+        "fix": "npm run format && npm run lint-fix",
+        "type-check": "tsc --noEmit",
+        "clean": "rm -rf dist generated",
+        "clean-install": "npm run clean && rm -rf node_modules package-lock.json && npm install"
+    },
+    "dependencies": {
+        "@prisma/client": "^6.16.0",
+        "cors": "^2.8.5",
+        "dotenv": "^17.2.2",
+        "express": "^5.1.0"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.3",
+        "@types/node": "^24.3.1",
+        "@typescript-eslint/eslint-plugin": "^8.43.0",
+        "@typescript-eslint/parser": "^8.43.0",
+        "eslint": "^9.35.0",
+        "eslint-config-prettier": "^10.1.8",
+        "nodemon": "^3.1.10",
+        "prettier": "^3.6.2",
+        "prisma": "^6.16.0",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.9.2"
+    }
+}
