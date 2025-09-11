@@ -17,6 +17,8 @@
     "prisma:generate": "npm run prisma:generate --prefix backend",
     "prisma:migrate": "npm run prisma:migrate --prefix backend",
     "prisma:studio": "npm run prisma:studio --prefix backend",
+    "prisma:seed": "npm run prisma:seed --prefix backend",
+    "prisma:reset": "npm run prisma:reset --prefix backend",
     "lint:frontend": "npm run lint --prefix frontend",
     "lint:backend": "npm run lint --prefix backend",
     "prepare": "husky"

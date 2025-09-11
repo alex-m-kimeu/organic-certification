@@ -1,9 +1,135 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Farmer {
+  id     String @id @default(cuid())
+  name   String
+  phone  String
+  email  String @unique
+  county String
+
+  // Relations
+  farms Farm[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("farmers")
+}
+
+model Farm {
+  id       String @id @default(cuid())
+  farmerId String
+  farmName String
+  location String
+  areaHa   Float
+
+  // Relations
+  farmer       Farmer        @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  fields       Field[]
+  inspections  Inspection[]
+  certificates Certificate[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("farms")
+}
+
+model Field {
+  id     String @id @default(cuid())
+  farmId String
+  name   String
+  crop   String
+  areaHa Float
+
+  // Relations
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("fields")
+}
+
+model Inspection {
+  id              String           @id @default(cuid())
+  farmId          String
+  date            DateTime         @default(now())
+  inspectorName   String
+  status          InspectionStatus @default(DRAFT)
+  complianceScore Float?
+
+  // Relations
+  farm      Farm                  @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  checklist InspectionChecklist[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("inspections")
+}
+
+model ChecklistQuestion {
+  id          Int     @id @default(autoincrement())
+  question    String
+  description String?
+  isActive    Boolean @default(true)
+  order       Int     @unique
+
+  // Relations
+  inspectionAnswers InspectionChecklist[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("checklist_questions")
+}
+
+model InspectionChecklist {
+  id           String  @id @default(cuid())
+  inspectionId String
+  questionId   Int
+  answer       Boolean
+
+  // Relations
+  inspection Inspection        @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  question   ChecklistQuestion @relation(fields: [questionId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([inspectionId, questionId])
+  @@map("inspection_checklist")
+}
+
+model Certificate {
+  id            String   @id @default(cuid())
+  farmId        String
+  certificateNo String   @unique
+  issueDate     DateTime @default(now())
+  expiryDate    DateTime
+  pdfUrl        String?
+
+  // Relations
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("certificates")
+}
+
+// Enums
+enum InspectionStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
 }
