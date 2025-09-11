@@ -1,0 +1,10 @@
+# dependencies
+/node_modules
+
+# environment variables
+.env
+
+# cache
+.eslintcache
+
+/src/generated/prisma

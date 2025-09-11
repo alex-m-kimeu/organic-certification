@@ -1,0 +1,36 @@
+{
+  "name": "organic-certification",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix frontend\" \"npm run dev --prefix backend\"",
+    "build": "npm run build --prefix frontend && npm run build --prefix backend",
+    "start": "concurrently \"npm run start --prefix frontend\" \"npm run start --prefix backend\"",
+    "lint": "npm run lint --prefix frontend && npm run lint --prefix backend",
+    "format": "prettier --write . --no-editorconfig --log-level silent",
+    "check": "prettier --check . --no-editorconfig",
+    "lint-fix": "npm run lint -- --fix",
+    "fix": "npm run format && npm run lint-fix",
+    "type-check": "npm run type-check --prefix frontend && npm run type-check --prefix backend",
+    "clean": "npm run clean --prefix frontend && npm run clean --prefix backend",
+    "clean-install": "npm run clean && rm -rf node_modules package-lock.json && npm install && npm run clean-install --prefix frontend && npm run clean-install --prefix backend",
+    "prisma:generate": "npm run prisma:generate --prefix backend",
+    "prisma:migrate": "npm run prisma:migrate --prefix backend",
+    "prisma:studio": "npm run prisma:studio --prefix backend",
+    "lint:frontend": "npm run lint --prefix frontend",
+    "lint:backend": "npm run lint --prefix backend",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx,json,md,css,scss,yaml,yml}": [
+      "prettier --write --no-editorconfig"
+    ]
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.6",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14"
+  }
+}
