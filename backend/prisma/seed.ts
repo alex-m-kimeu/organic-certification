@@ -1,11 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../src/config/db';
 
 // Declare Node.js globals
 declare let process: {
 	exit: (code?: number) => never;
 };
-
-const prisma = new PrismaClient();
 
 async function main(): Promise<void> {
 	console.log('🌱 Seeding database...');
