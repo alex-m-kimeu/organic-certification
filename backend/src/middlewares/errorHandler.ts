@@ -56,7 +56,7 @@ const createErrorResponse = (error: Error, statusCode: number, req: Request, det
 	return response;
 };
 
-// Handle Prisma errors
+// Handle Prisma errors with enhanced edge cases
 const handlePrismaError = (error: unknown, req: Request, res: Response): void => {
 	if (error instanceof Prisma.PrismaClientKnownRequestError) {
 		let statusCode = 400;
@@ -65,19 +65,30 @@ const handlePrismaError = (error: unknown, req: Request, res: Response): void =>
 		switch (error.code) {
 			case 'P2002':
 				statusCode = 409;
-				message = 'A record with this data already exists';
+				const target = error.meta?.target as string[] | undefined;
+				if (target?.includes('email')) {
+					message = 'A user with this email already exists';
+				} else if (target?.includes('phone')) {
+					message = 'A user with this phone number already exists';
+				} else if (target?.includes('farmerId_farmName')) {
+					message = 'A farm with this name already exists for this farmer';
+				} else if (target?.includes('farmId_name')) {
+					message = 'A field with this name already exists in this farm';
+				} else {
+					message = 'A record with this data already exists';
+				}
 				break;
 			case 'P2025':
 				statusCode = 404;
-				message = 'Record not found';
+				message = 'Record not found or has been deleted';
 				break;
 			case 'P2003':
 				statusCode = 400;
-				message = 'Foreign key constraint violation';
+				message = 'Cannot delete record due to existing dependencies';
 				break;
 			case 'P2011':
 				statusCode = 400;
-				message = 'Null constraint violation';
+				message = 'Required field cannot be null';
 				break;
 			case 'P2012':
 				statusCode = 400;
@@ -85,7 +96,31 @@ const handlePrismaError = (error: unknown, req: Request, res: Response): void =>
 				break;
 			case 'P2014':
 				statusCode = 400;
-				message = 'Invalid relation reference';
+				message = 'Invalid relation reference - related record not found';
+				break;
+			case 'P2015':
+				statusCode = 400;
+				message = 'A related record could not be found';
+				break;
+			case 'P2016':
+				statusCode = 400;
+				message = 'Query interpretation error';
+				break;
+			case 'P2017':
+				statusCode = 400;
+				message = 'The records for relation are not connected';
+				break;
+			case 'P2018':
+				statusCode = 400;
+				message = 'The required connected records were not found';
+				break;
+			case 'P2019':
+				statusCode = 400;
+				message = 'Input error';
+				break;
+			case 'P2020':
+				statusCode = 400;
+				message = 'Value out of range for the type';
 				break;
 			case 'P2021':
 				statusCode = 400;
@@ -94,6 +129,22 @@ const handlePrismaError = (error: unknown, req: Request, res: Response): void =>
 			case 'P2022':
 				statusCode = 400;
 				message = 'Column does not exist';
+				break;
+			case 'P2023':
+				statusCode = 400;
+				message = 'Inconsistent column data';
+				break;
+			case 'P2024':
+				statusCode = 408;
+				message = 'Database operation timed out';
+				break;
+			case 'P2026':
+				statusCode = 503;
+				message = 'Database server unavailable';
+				break;
+			case 'P2027':
+				statusCode = 500;
+				message = 'Multiple database errors occurred during query execution';
 				break;
 			default:
 				message = `Database error: ${error.message}`;
@@ -236,4 +287,74 @@ export const notFoundHandler = (req: Request, res: Response): void => {
 	};
 
 	res.status(404).json(errorResponse);
+};
+
+// Utility functions for common service patterns
+export const ServiceErrors = {
+	// Validation helpers
+	validatePagination: (page: number, limit: number): void => {
+		if (page < 1) {
+			throw new AppError('Page must be greater than 0', 400, 'INVALID_PAGE');
+		}
+		if (limit < 1 || limit > 100) {
+			throw new AppError('Limit must be between 1 and 100', 400, 'INVALID_LIMIT');
+		}
+	},
+
+	validatePositiveNumber: (value: number, fieldName: string): void => {
+		if (value <= 0) {
+			throw new AppError(`${fieldName} must be greater than 0`, 400, 'INVALID_VALUE');
+		}
+	},
+
+	validateMaxValue: (value: number, max: number, fieldName: string): void => {
+		if (value > max) {
+			throw new AppError(`${fieldName} cannot exceed ${max}`, 400, 'VALUE_TOO_LARGE');
+		}
+	},
+
+	validateRequiredString: (value: string | undefined, fieldName: string): void => {
+		if (!value || !value.trim()) {
+			throw new AppError(`${fieldName} is required and cannot be empty`, 400, 'REQUIRED_FIELD_MISSING');
+		}
+	},
+
+	// Common business logic errors
+	notFound: (entityName: string, id?: string): AppError => {
+		const message = id ? `${entityName} with ID '${id}' not found` : `${entityName} not found`;
+		return new AppError(message, 404, `${entityName.toUpperCase()}_NOT_FOUND`);
+	},
+
+	alreadyExists: (entityName: string, field: string): AppError => {
+		return new AppError(
+			`A ${entityName} with this ${field} already exists`,
+			409,
+			`${entityName.toUpperCase()}_${field.toUpperCase()}_EXISTS`,
+		);
+	},
+
+	hasDepencies: (entityName: string, dependencies: string): AppError => {
+		return new AppError(
+			`Cannot delete ${entityName} with existing ${dependencies}. Please handle dependencies first.`,
+			400,
+			`${entityName.toUpperCase()}_HAS_DEPENDENCIES`,
+		);
+	},
+
+	constraintViolation: (constraint: string): AppError => {
+		return new AppError(`Operation violates business rule: ${constraint}`, 400, 'CONSTRAINT_VIOLATION');
+	},
+
+	// Transaction helpers
+	wrapTransaction: <T>(operation: () => Promise<T>, errorMessage: string = 'Transaction failed'): Promise<T> => {
+		return operation().catch((error) => {
+			if (error instanceof AppError) throw error;
+
+			if (error instanceof Prisma.PrismaClientKnownRequestError) {
+				throw error; // Let the global handler deal with it
+			}
+
+			throw new AppError(errorMessage, 500);
+		});
+	},
 };
