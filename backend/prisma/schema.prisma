@@ -10,7 +10,7 @@ datasource db {
 model Farmer {
   id     String @id @default(cuid())
   name   String
-  phone  String
+  phone  String @unique
   email  String @unique
   county String
 
@@ -39,6 +39,7 @@ model Farm {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([farmerId, farmName])
   @@map("farms")
 }
 
@@ -55,6 +56,7 @@ model Field {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([farmId, name])
   @@map("fields")
 }
 

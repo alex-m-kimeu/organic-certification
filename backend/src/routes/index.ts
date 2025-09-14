@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import farmerRoutes from './farmer.routes';
+import farmRoutes from './farm.routes';
+import fieldRoutes from './field.routes';
 
 const router = Router();
 
@@ -39,8 +41,8 @@ router.get('/', (req, res) => {
 		version: '1.0.0',
 		endpoints: {
 			farmers: '/api/farmers',
-			// farms: '/api/farms', // Will be added later
-			// fields: '/api/fields', // Will be added later
+			farms: '/api/farms',
+			fields: '/api/fields',
 			// inspections: '/api/inspections', // Will be added later
 			// certificates: '/api/certificates', // Will be added later
 		},
@@ -51,10 +53,10 @@ router.get('/', (req, res) => {
 
 // Mount route modules
 router.use('/farmers', farmerRoutes);
+router.use('/farms', farmRoutes);
+router.use('/fields', fieldRoutes);
 
 // Future route modules will be added here:
-// router.use('/farms', farmRoutes);
-// router.use('/fields', fieldRoutes);
 // router.use('/inspections', inspectionRoutes);
 // router.use('/certificates', certificateRoutes);
 
@@ -66,6 +68,8 @@ router.use((req, res) => {
 		error: 'Not Found',
 		availableEndpoints: {
 			farmers: '/api/farmers',
+			farms: '/api/farms',
+			fields: '/api/fields',
 			docs: '/api/docs',
 			health: '/health',
 		},

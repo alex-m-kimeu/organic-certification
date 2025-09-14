@@ -359,6 +359,78 @@ export class FarmerController {
 
 		res.json(response);
 	});
+
+	/**
+	 * @swagger
+	 * /api/farmers/{id}/details:
+	 *   get:
+	 *     summary: Get farmer with all farms and fields
+	 *     description: Retrieve detailed information about a farmer including all their farms and fields
+	 *     tags: [Farmers]
+	 *     parameters:
+	 *       - name: id
+	 *         in: path
+	 *         required: true
+	 *         description: Unique identifier for the farmer
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       200:
+	 *         description: Farmer details with farms and fields retrieved successfully
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               $ref: '#/components/schemas/SuccessResponse'
+	 *       404:
+	 *         description: Farmer not found
+	 */
+	getFarmerWithFarmsAndFields = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+		const { id } = req.params;
+		const farmerDetails = await this.farmerService.getFarmerWithFarmsAndFields(id);
+
+		const response: ApiResponse<typeof farmerDetails> = {
+			success: true,
+			data: farmerDetails,
+		};
+
+		res.json(response);
+	});
+
+	/**
+	 * @swagger
+	 * /api/farmers/{id}/dashboard:
+	 *   get:
+	 *     summary: Get farmer dashboard summary
+	 *     description: Retrieve a dashboard summary for a farmer with key metrics and recent activities
+	 *     tags: [Farmers]
+	 *     parameters:
+	 *       - name: id
+	 *         in: path
+	 *         required: true
+	 *         description: Unique identifier for the farmer
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       200:
+	 *         description: Farmer dashboard retrieved successfully
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               $ref: '#/components/schemas/SuccessResponse'
+	 *       404:
+	 *         description: Farmer not found
+	 */
+	getFarmerDashboard = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+		const { id } = req.params;
+		const dashboard = await this.farmerService.getFarmerDashboard(id);
+
+		const response: ApiResponse<typeof dashboard> = {
+			success: true,
+			data: dashboard,
+		};
+
+		res.json(response);
+	});
 }
 
 export const farmerController = new FarmerController();

@@ -1,4 +1,5 @@
 import { Farmer as PrismaFarmer } from '@prisma/client';
+import { ApiResponse, PaginatedResponse } from './common.types';
 
 export interface Farmer extends PrismaFarmer {}
 
@@ -16,19 +17,4 @@ export interface UpdateFarmerDto {
 	county?: string;
 }
 
-export interface ApiResponse<T> {
-	success: boolean;
-	data?: T;
-	message?: string;
-}
-
-export interface PaginatedResponse<T> {
-	success: boolean;
-	data: T[];
-	pagination: {
-		page: number;
-		limit: number;
-		total: number;
-		totalPages: number;
-	};
-}
+export type { ApiResponse, PaginatedResponse };

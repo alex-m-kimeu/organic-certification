@@ -42,6 +42,8 @@ const router = Router();
 router.post('/', rateLimiter, validateBody(createFarmerSchema), farmerController.createFarmer);
 router.get('/', farmerController.getFarmers);
 router.get('/:id', farmerController.getFarmerById);
+router.get('/:id/details', farmerController.getFarmerWithFarmsAndFields);
+router.get('/:id/dashboard', farmerController.getFarmerDashboard);
 router.patch('/:id', validateBody(updateFarmerSchema), farmerController.updateFarmer);
 router.delete('/:id', rateLimiter, farmerController.deleteFarmer);
 
