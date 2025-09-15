@@ -2,6 +2,7 @@ import { Router } from 'express';
 import farmerRoutes from './farmer.routes';
 import farmRoutes from './farm.routes';
 import fieldRoutes from './field.routes';
+import inspectionRoutes from './inspection.routes';
 
 const router = Router();
 
@@ -43,7 +44,7 @@ router.get('/', (req, res) => {
 			farmers: '/api/farmers',
 			farms: '/api/farms',
 			fields: '/api/fields',
-			// inspections: '/api/inspections', // Will be added later
+			inspections: '/api/inspections',
 			// certificates: '/api/certificates', // Will be added later
 		},
 		docs: '/api/docs',
@@ -55,9 +56,9 @@ router.get('/', (req, res) => {
 router.use('/farmers', farmerRoutes);
 router.use('/farms', farmRoutes);
 router.use('/fields', fieldRoutes);
+router.use('/inspections', inspectionRoutes);
 
 // Future route modules will be added here:
-// router.use('/inspections', inspectionRoutes);
 // router.use('/certificates', certificateRoutes);
 
 // Handle unmatched API routes - catch all remaining routes
@@ -70,6 +71,7 @@ router.use((req, res) => {
 			farmers: '/api/farmers',
 			farms: '/api/farms',
 			fields: '/api/fields',
+			inspections: '/api/inspections',
 			docs: '/api/docs',
 			health: '/health',
 		},
