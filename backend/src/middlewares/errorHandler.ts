@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-console */
 import type { Request, Response, NextFunction } from 'express';
 import { Prisma } from '@prisma/client';
 import { ZodError } from 'zod';
+import { logger } from '../utils/logger';
 
 // Custom error class for application-specific errors
 export class AppError extends Error {
@@ -198,7 +198,7 @@ const handleZodError = (error: ZodError, req: Request, res: Response): void => {
 
 // Global error handler middleware
 export const globalErrorHandler = (error: Error, req: Request, res: Response, _next: NextFunction): void => {
-	console.error('Global error handler caught:', {
+	logger.error('Global error handler caught:', {
 		name: error.name,
 		message: error.message,
 		stack: error.stack,

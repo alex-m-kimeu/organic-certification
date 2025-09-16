@@ -42,7 +42,7 @@ export class InspectionController {
 	 *                 example: "John Smith"
 	 *               checklist:
 	 *                 type: array
-	 *                 description: Array of checklist answers (minimum 5 questions required)
+	 *                 description: Array of checklist answers (minimum 5 questions required, up to 10 questions available)
 	 *                 items:
 	 *                   type: object
 	 *                   properties:
@@ -66,10 +66,20 @@ export class InspectionController {
 	 *                   - questionId: 2
 	 *                     answer: true
 	 *                   - questionId: 3
-	 *                     answer: false
+	 *                     answer: true
 	 *                   - questionId: 4
 	 *                     answer: true
 	 *                   - questionId: 5
+	 *                     answer: true
+	 *                   - questionId: 6
+	 *                     answer: true
+	 *                   - questionId: 7
+	 *                     answer: true
+	 *                   - questionId: 8
+	 *                     answer: true
+	 *                   - questionId: 9
+	 *                     answer: true
+	 *                   - questionId: 10
 	 *                     answer: true
 	 *     responses:
 	 *       201:
@@ -239,7 +249,7 @@ export class InspectionController {
 	 *                 example: "Jane Doe"
 	 *               checklist:
 	 *                 type: array
-	 *                 description: Updated checklist answers
+	 *                 description: Updated checklist answers (up to 10 questions available)
 	 *                 items:
 	 *                   type: object
 	 *                   properties:
