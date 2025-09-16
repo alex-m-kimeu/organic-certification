@@ -7,14 +7,25 @@ import {
 	InspectionWithFarm,
 	InspectionWithDetails,
 } from '../types/inspection.types';
+import { CertificateService } from './certificate.service';
+import { logger } from '../utils/logger';
 
 export class InspectionService {
+	private certificateService: CertificateService;
+
+	constructor() {
+		this.certificateService = new CertificateService();
+	}
 	/**
 	 * Create a new inspection with checklist answers
 	 */
 	async createInspection(data: CreateInspectionDto): Promise<InspectionWithDetails> {
 		try {
-			return await prisma.$transaction(async (tx) => {
+			const totalQuestions = data.checklist.length;
+			const yesAnswers = data.checklist.filter((item) => item.answer === true).length;
+			const complianceScore = Math.round((yesAnswers / totalQuestions) * 100);
+
+			const createdInspection = await prisma.$transaction(async (tx) => {
 				// Verify farm exists
 				const farm = await tx.farm.findUnique({
 					where: { id: data.farmId },
@@ -37,11 +48,6 @@ export class InspectionService {
 				if (questions.length !== questionIds.length) {
 					throw new AppError('One or more checklist questions not found or inactive', 400);
 				}
-
-				// Calculate compliance score
-				const totalQuestions = data.checklist.length;
-				const yesAnswers = data.checklist.filter((item) => item.answer === true).length;
-				const complianceScore = Math.round((yesAnswers / totalQuestions) * 100);
 
 				// Determine status based on compliance score
 				let status: InspectionStatus = InspectionStatus.DRAFT;
@@ -76,7 +82,7 @@ export class InspectionService {
 				});
 
 				// Return inspection with all related data
-				return await tx.inspection.findUniqueOrThrow({
+				const createdInspection = await tx.inspection.findUniqueOrThrow({
 					where: { id: inspection.id },
 					include: {
 						farm: {
@@ -96,7 +102,21 @@ export class InspectionService {
 						},
 					},
 				});
+
+				return createdInspection;
 			});
+
+			// Generate certificate if compliance >= 90% (auto-approved)
+			if (complianceScore >= 90) {
+				this.generateCertificateAsync({
+					farmId: data.farmId,
+					complianceScore,
+					inspectorName: data.inspectorName,
+					inspectionDate: new Date(),
+				});
+			}
+
+			return createdInspection;
 		} catch (error) {
 			if (error instanceof AppError) throw error;
 
@@ -415,7 +435,7 @@ export class InspectionService {
 	 */
 	async approveInspection(id: string, approved: boolean): Promise<InspectionWithDetails> {
 		try {
-			return await prisma.$transaction(async (tx) => {
+			const updatedInspection = await prisma.$transaction(async (tx) => {
 				const inspection = await tx.inspection.findUnique({
 					where: { id },
 				});
@@ -460,6 +480,18 @@ export class InspectionService {
 					},
 				});
 			});
+
+			// Generate certificate if approved and compliance >= 80%
+			if (approved && updatedInspection.complianceScore && updatedInspection.complianceScore >= 80) {
+				this.generateCertificateAsync({
+					farmId: updatedInspection.farmId,
+					complianceScore: updatedInspection.complianceScore,
+					inspectorName: updatedInspection.inspectorName,
+					inspectionDate: updatedInspection.date,
+				});
+			}
+
+			return updatedInspection;
 		} catch (error) {
 			if (error instanceof AppError) throw error;
 			throw new AppError('Failed to approve inspection', 500);
@@ -518,5 +550,34 @@ export class InspectionService {
 		} catch {
 			throw new AppError('Failed to fetch checklist questions', 500);
 		}
+	}
+
+	/**
+	 * Generate certificate asynchronously to prevent transaction rollback
+	 */
+	private generateCertificateAsync(data: {
+		farmId: string;
+		complianceScore: number;
+		inspectorName: string;
+		inspectionDate: Date;
+	}): void {
+		// Fire and forget - don't await to prevent affecting the main inspection flow
+		this.certificateService
+			.generateCertificate(data)
+			.then(() => {
+				logger.info('Certificate generated successfully from inspection approval', {
+					farmId: data.farmId,
+					complianceScore: data.complianceScore,
+					inspectorName: data.inspectorName,
+				});
+			})
+			.catch((error) => {
+				logger.error('Failed to generate certificate from inspection approval', {
+					farmId: data.farmId,
+					complianceScore: data.complianceScore,
+					inspectorName: data.inspectorName,
+					error: error instanceof Error ? error.message : 'Unknown error',
+				});
+			});
 	}
 }

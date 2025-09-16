@@ -29,6 +29,7 @@ cloudinary.config({
 	api_secret: requiredEnvVars.CLOUDINARY_API_SECRET,
 	secure: true,
 	url_analytics: false,
+	timeout: 30000,
 });
 
 export { cloudinary };

@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
+import { join } from 'path';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec, swaggerUiOptions } from './config/swagger';
 import { rateLimiter } from './config/rateLimit';
@@ -67,6 +68,10 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.use('/api', apiRoutes);
+
+// Static file serving for locally saved certificates
+const storageDir = process.env.LOCAL_STORAGE_DIR || join(process.cwd(), 'storage');
+app.use('/uploads', express.static(storageDir));
 
 // 404 handler - catch all unmatched routes
 app.use(notFoundHandler);

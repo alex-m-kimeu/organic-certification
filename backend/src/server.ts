@@ -35,6 +35,52 @@ process.on('uncaughtException', (error: Error) => {
 process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
 	console.error('❌ Unhandled Rejection at:', promise);
 	console.error('❌ Reason:', reason);
+
+	// Check if it's a network-related error that shouldn't crash the server
+	const isNetworkError =
+		(reason instanceof Error &&
+			(reason.message.includes('ETIMEDOUT') ||
+				reason.message.includes('ECONNRESET') ||
+				reason.message.includes('ENOTFOUND') ||
+				reason.message.includes('ECONNREFUSED') ||
+				reason.message.includes('network') ||
+				reason.message.includes('Cloudinary') ||
+				('code' in reason &&
+					(reason.code === 'ETIMEDOUT' ||
+						reason.code === 'ECONNRESET' ||
+						reason.code === 'ENOTFOUND' ||
+						reason.code === 'ECONNREFUSED')))) ||
+		(reason &&
+			typeof reason === 'object' &&
+			reason !== null &&
+			'error' in reason &&
+			reason.error instanceof Error &&
+			(('code' in reason.error &&
+				(reason.error.code === 'ETIMEDOUT' ||
+					reason.error.code === 'ECONNRESET' ||
+					reason.error.code === 'ENOTFOUND' ||
+					reason.error.code === 'ECONNREFUSED')) ||
+				reason.error.message.includes('ETIMEDOUT') ||
+				reason.error.message.includes('ECONNRESET') ||
+				reason.error.message.includes('ENOTFOUND') ||
+				reason.error.message.includes('ECONNREFUSED'))) ||
+		// Handle AggregateError cases
+		(reason &&
+			typeof reason === 'object' &&
+			reason !== null &&
+			'error' in reason &&
+			reason.error &&
+			typeof reason.error === 'object' &&
+			reason.error !== null &&
+			'code' in reason.error &&
+			reason.error.code === 'ETIMEDOUT');
+
+	if (isNetworkError) {
+		console.warn('⚠️  Network error detected, continuing server operation...');
+		console.warn('⚠️  Consider checking network connectivity to external services');
+		return;
+	}
+
 	console.error('🛑 Shutting down due to unhandled promise rejection');
 	process.exit(1);
 });
