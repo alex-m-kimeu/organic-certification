@@ -19,7 +19,7 @@
 :root {
 	--background: oklch(1 0 0);
 	--primary: oklch(0.75 0.17 145);
-	--accent: oklch(0.97 0 0);
+	--accent: oklch(0.967 0.003 264.54);
 	--text: oklch(0.216 0.019 251.46);
 	--text-muted: oklch(0.521 0.012 250.127);
 	--border: oklch(0.85 0.005 231.686);
@@ -171,4 +171,9 @@
 		letter-spacing: 0.005em;
 		line-height: 1.4;
 	}
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation: none;
+	mix-blend-mode: normal;
 }
