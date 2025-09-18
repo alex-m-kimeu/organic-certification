@@ -58,9 +58,9 @@ function DialogContent({
 				{showCloseButton && (
 					<DialogPrimitive.Close
 						data-slot='dialog-close'
-						className="data-[state=open]:bg-accent data-[state=open]:text-muted-foreground rounded-xs focus:outline-hidden absolute right-4 top-4 opacity-70 transition-opacity hover:opacity-100 disabled:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0"
+						className="data-[state=open]:bg-accent data-[state=open]:text-muted-foreground rounded-xs focus:outline-hidden absolute right-4 top-4 cursor-pointer opacity-70 transition-opacity hover:opacity-100 disabled:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0"
 					>
-						<XIcon />
+						<XIcon className='text-primary' />
 						<span className='sr-only'>Close</span>
 					</DialogPrimitive.Close>
 				)}
@@ -80,13 +80,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 function DialogFooter({ className, ...props }: React.ComponentProps<'div'>) {
-	return (
-		<div
-			data-slot='dialog-footer'
-			className={cn('flex flex-col-reverse gap-2 sm:flex-row sm:justify-end', className)}
-			{...props}
-		/>
-	);
+	return <div data-slot='dialog-footer' className={cn('flex', className)} {...props} />;
 }
 
 function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {

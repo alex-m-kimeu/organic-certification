@@ -1,7 +1,5 @@
-import React from 'react';
+import FarmersManagement from '@/components/farmers/farmers-management';
 
-const Farmer = () => {
-	return <div>Farmer</div>;
-};
-
-export default Farmer;
+export default function Farmer() {
+	return <FarmersManagement />;
+}

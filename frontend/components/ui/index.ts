@@ -6,5 +6,8 @@ export * from './pagination';
 export * from './form';
 export * from './table';
 export * from './dialog';
+export * from './alert-dialog';
 export * from './label';
 export * from './sonner';
+export * from './card';
+export * from './badge';
