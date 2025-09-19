@@ -46,7 +46,7 @@ export default function FarmsManagement() {
 	useEffect(() => {
 		const timeoutId = setTimeout(() => {
 			setDebouncedSearchTerm(searchTerm);
-			setCurrentPage(1); // Reset to first page on search
+			setCurrentPage(1);
 		}, 300);
 
 		return () => clearTimeout(timeoutId);

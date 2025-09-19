@@ -231,7 +231,7 @@ export default function FarmsTable({
 							{loading ? (
 								<TableRow>
 									<TableCell
-										colSpan={6}
+										colSpan={7}
 										className='t-style-link text-text-muted h-24 text-center !font-normal'
 									>
 										<div role='status' aria-label='Loading farms data'>
