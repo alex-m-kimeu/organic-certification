@@ -29,7 +29,7 @@ import {
 } from '@/components/ui';
 import { Award, Calendar, Clock, Download, Trash2, Search } from 'lucide-react';
 import type { Certificate } from '@/types/certificate';
-import DeleteCertificateConfirmDialog from '../farm/delete-certificate-confirm-dialog';
+import DeleteCertificateConfirmDialog from '../certificate/delete-certificate-confirm-dialog';
 
 interface FarmerCertificatesTabProps {
 	farmerId: string;

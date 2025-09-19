@@ -163,10 +163,10 @@ export const SideBar = () => {
 								</li>
 								<li>
 									<Link
-										href='/farms'
-										className={getLinkClasses('/farms')}
+										href='/farm'
+										className={getLinkClasses('/farm')}
 										onClick={closeMobileMenu}
-										aria-current={pathname === '/farms' ? 'page' : undefined}
+										aria-current={pathname === '/farm' ? 'page' : undefined}
 									>
 										<PiFarmLight className='size-4' aria-hidden='true' />
 										Farms
@@ -174,10 +174,10 @@ export const SideBar = () => {
 								</li>
 								<li>
 									<Link
-										href='/inspections'
-										className={getLinkClasses('/inspections')}
+										href='/inspection'
+										className={getLinkClasses('/inspection')}
 										onClick={closeMobileMenu}
-										aria-current={pathname === '/inspections' ? 'page' : undefined}
+										aria-current={pathname === '/inspection' ? 'page' : undefined}
 									>
 										<PiListChecksLight className='size-4' aria-hidden='true' />
 										Inspections
@@ -185,10 +185,10 @@ export const SideBar = () => {
 								</li>
 								<li>
 									<Link
-										href='/certificates'
-										className={getLinkClasses('/certificates')}
+										href='/certificate'
+										className={getLinkClasses('/certificate')}
 										onClick={closeMobileMenu}
-										aria-current={pathname === '/certificates' ? 'page' : undefined}
+										aria-current={pathname === '/certificate' ? 'page' : undefined}
 									>
 										<PiCertificateLight className='size-4' aria-hidden='true' />
 										Certificates
