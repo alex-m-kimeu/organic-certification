@@ -318,7 +318,9 @@ export class InspectionService {
 	 */
 	async updateInspection(id: string, data: UpdateInspectionDto): Promise<InspectionWithDetails> {
 		try {
-			return await prisma.$transaction(async (tx) => {
+			let calculatedComplianceScore: number | null = null;
+
+			const updatedInspection = await prisma.$transaction(async (tx) => {
 				const existingInspection = await tx.inspection.findUnique({
 					where: { id },
 				});
@@ -375,6 +377,9 @@ export class InspectionService {
 					const yesAnswers = allAnswers.filter((item) => item.answer === true).length;
 					const complianceScore = Math.round((yesAnswers / totalQuestions) * 100);
 
+					// Store the calculated score for certificate generation
+					calculatedComplianceScore = complianceScore;
+
 					// Determine new status based on compliance score
 					let status: InspectionStatus = InspectionStatus.DRAFT;
 					if (complianceScore >= 90) {
@@ -417,6 +422,18 @@ export class InspectionService {
 					},
 				});
 			});
+
+			// Generate certificate if compliance >= 90% (auto-approved) and checklist was updated
+			if (data.checklist && calculatedComplianceScore !== null && calculatedComplianceScore >= 90) {
+				this.generateCertificateAsync({
+					farmId: updatedInspection.farmId,
+					complianceScore: calculatedComplianceScore,
+					inspectorName: updatedInspection.inspectorName,
+					inspectionDate: updatedInspection.date,
+				});
+			}
+
+			return updatedInspection;
 		} catch (error) {
 			if (error instanceof AppError) throw error;
 
@@ -509,11 +526,6 @@ export class InspectionService {
 
 			if (!inspection) {
 				throw new AppError('Inspection not found', 404);
-			}
-
-			// Don't allow deletion of approved inspections
-			if (inspection.status === InspectionStatus.APPROVED) {
-				throw new AppError('Cannot delete approved inspections', 400);
 			}
 
 			await prisma.inspection.delete({
