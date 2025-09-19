@@ -27,7 +27,7 @@ import {
 	PaginationNext,
 	PaginationPrevious,
 } from '@/components/ui';
-import { Search, Trash2, Edit, Phone, Mail, MapPin, Calendar } from 'lucide-react';
+import { Search, Trash2, Edit, Eye, Phone, Mail, MapPin, Calendar } from 'lucide-react';
 import type { Farmer } from '@/types/farmer';
 
 interface FarmersTableProps {
@@ -45,6 +45,7 @@ interface FarmersTableProps {
 	setItemsPerPage: (items: number) => void;
 	onDeleteFarmer: (farmer: Farmer) => void;
 	onEditFarmer?: (farmer: Farmer) => void;
+	onViewFarmer?: (farmer: Farmer) => void;
 }
 
 export default function FarmersTable({
@@ -62,6 +63,7 @@ export default function FarmersTable({
 	setItemsPerPage,
 	onDeleteFarmer,
 	onEditFarmer,
+	onViewFarmer,
 }: FarmersTableProps) {
 	// Format date
 	const formatDate = (dateString: string) => {
@@ -105,7 +107,7 @@ export default function FarmersTable({
 			return farmerParts[0].charAt(0).toUpperCase();
 		}
 
-		return 'BS';
+		return 'FM';
 	};
 
 	// Generate pagination items with ellipsis
@@ -264,7 +266,7 @@ export default function FarmersTable({
 								</TableRow>
 							) : (
 								farmers.map((farmer) => (
-									<TableRow key={farmer.id} className='border-border'>
+									<TableRow key={farmer.id} className='border-border/40 dark:border-border'>
 										<TableCell>
 											<div className='flex items-center gap-3'>
 												<Avatar className='size-10'>
@@ -276,21 +278,21 @@ export default function FarmersTable({
 														{getFarmerInitials(farmer.name)}
 													</AvatarFallback>
 												</Avatar>
-												<p className='t-style-caption text-text-muted !font-normal'>
+												<p className='t-style-link text-text-muted !font-normal'>
 													{farmer.name}
 												</p>
 											</div>
 										</TableCell>
 										<TableCell>
 											<div className='space-y-1'>
-												<div className='t-style-caption text-text-muted flex items-center gap-2 !font-normal'>
+												<div className='t-style-link text-text-muted flex items-center gap-2 !font-normal'>
 													<Phone className='text-text-muted size-3' aria-hidden='true' />
 													<span>
 														<span className='sr-only'>Phone: </span>
 														{formatPhone(farmer.phone)}
 													</span>
 												</div>
-												<div className='t-style-caption text-text-muted flex items-center gap-2 !font-normal'>
+												<div className='t-style-link text-text-muted flex items-center gap-2 !font-normal'>
 													<Mail className='size-3' aria-hidden='true' />
 													<span className='max-w-[200px] truncate'>
 														<span className='sr-only'>Email: </span>
@@ -300,14 +302,14 @@ export default function FarmersTable({
 											</div>
 										</TableCell>
 										<TableCell>
-											<div className='t-style-caption text-text-muted flex items-center gap-1 !font-normal'>
+											<div className='t-style-link text-text-muted flex items-center gap-1 !font-normal'>
 												<MapPin className='size-3' aria-hidden='true' />
 												<span className='sr-only'>County: </span>
 												{farmer.county}
 											</div>
 										</TableCell>
 										<TableCell>
-											<div className='t-style-caption text-text-muted flex items-center gap-2 !font-normal'>
+											<div className='t-style-link text-text-muted flex items-center gap-2 !font-normal'>
 												<Calendar className='size-3' aria-hidden='true' />
 												<span>
 													<span className='sr-only'>Registered on: </span>
@@ -317,6 +319,17 @@ export default function FarmersTable({
 										</TableCell>
 										<TableCell className='text-right'>
 											<div className='flex items-center justify-end gap-2'>
+												{onViewFarmer && (
+													<Button
+														variant='ghost'
+														size='sm'
+														onClick={() => onViewFarmer(farmer)}
+														className='text-text-muted focus:ring-primary focus:ring-offset-background h-8 w-8 cursor-pointer p-0 focus:ring-[0.5px] focus:ring-offset-2'
+														aria-label={`View ${farmer.name} details`}
+													>
+														<Eye className='size-4' aria-hidden='true' />
+													</Button>
+												)}
 												{onEditFarmer && (
 													<Button
 														variant='ghost'

@@ -146,7 +146,7 @@ export default function FarmerDialog({ farmer, onFarmerAdded, onClose }: FarmerD
 		>
 			{!isEditing && (
 				<DialogTrigger asChild>
-					<Button className='t-style-link rounded-2 bg-primary hover:bg-primary/70 focus:ring-primary focus:ring-offset-accent flex cursor-pointer items-center justify-center px-4 py-2 text-white shadow-none transition-all focus:ring-[0.5px] focus:ring-offset-2'>
+					<Button className='t-style-link rounded-2 bg-primary hover:bg-primary/70 focus:ring-primary focus:ring-offset-background flex cursor-pointer items-center justify-center px-4 py-2 text-white shadow-none transition-all focus:ring-[0.5px] focus:ring-offset-2'>
 						<IoAdd className='mr-1 h-4 w-4' aria-hidden='true' />
 						Add New Farmer
 					</Button>

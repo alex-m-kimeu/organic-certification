@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { Farmer } from '@/types/farmer';
 import FarmersTable from './farmers-table';
@@ -21,6 +22,7 @@ interface PaginatedResponse {
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function FarmersManagement() {
+	const router = useRouter();
 	const [farmers, setFarmers] = useState<Farmer[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [searchTerm, setSearchTerm] = useState('');
@@ -147,6 +149,11 @@ export default function FarmersManagement() {
 		setFarmerToEdit(farmer);
 	};
 
+	// Handle view farmer
+	const handleViewFarmer = (farmer: Farmer) => {
+		router.push(`/farmer/${farmer.id}`);
+	};
+
 	// Handle close edit dialog
 	const handleCloseEditDialog = () => {
 		setFarmerToEdit(null);
@@ -187,6 +194,7 @@ export default function FarmersManagement() {
 					setItemsPerPage={setItemsPerPage}
 					onDeleteFarmer={handleDeleteFarmer}
 					onEditFarmer={handleEditFarmer}
+					onViewFarmer={handleViewFarmer}
 				/>
 			</section>
 

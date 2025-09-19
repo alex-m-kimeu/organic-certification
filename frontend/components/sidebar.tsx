@@ -152,10 +152,10 @@ export const SideBar = () => {
 							<ul className='flex flex-col space-y-8' role='list'>
 								<li>
 									<Link
-										href='/'
-										className={getLinkClasses('/')}
+										href='/farmer'
+										className={getLinkClasses('/farmer')}
 										onClick={closeMobileMenu}
-										aria-current={pathname === '/' ? 'page' : undefined}
+										aria-current={pathname === '/farmer' ? 'page' : undefined}
 									>
 										<PiTractorLight className='size-4' aria-hidden='true' />
 										Farmers

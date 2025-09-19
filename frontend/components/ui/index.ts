@@ -11,3 +11,4 @@ export * from './label';
 export * from './sonner';
 export * from './card';
 export * from './badge';
+export * from './tabs';
