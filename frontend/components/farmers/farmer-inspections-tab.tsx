@@ -580,7 +580,7 @@ export default function FarmerInspectionsTab({ farmerId, onDataChange: _onDataCh
 														variant='ghost'
 														size='sm'
 														onClick={() => handleUpdateInspection(inspection)}
-														className='focus:ring-offset-background h-8 w-8 cursor-pointer p-0 text-blue-600 hover:bg-blue-50 hover:text-blue-800 focus:ring-[0.5px] focus:ring-blue-500 focus:ring-offset-2'
+														className='text-primary focus:ring-primary focus:ring-offset-background h-8 w-8 cursor-pointer p-0 focus:ring-[0.5px] focus:ring-offset-2'
 														aria-label={`Update inspection for ${inspection.farm.farmName}`}
 													>
 														<Edit className='size-4' aria-hidden='true' />
