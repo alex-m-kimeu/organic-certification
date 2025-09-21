@@ -18,31 +18,30 @@ export const SideBar = () => {
 		setIsMobileMenuOpen(!isMobileMenuOpen);
 	};
 
-	const closeMobileMenu = () => {
-		setIsMobileMenuOpen(false);
-		menuButtonRef.current?.focus();
-	};
-
+	// Handle keyboard accessibility and focus management
 	useEffect(() => {
-		const handleEscape = (event: KeyboardEvent) => {
+		const handleKeyDown = (event: KeyboardEvent) => {
 			if (event.key === 'Escape' && isMobileMenuOpen) {
 				closeMobileMenu();
 			}
 		};
 
-		document.addEventListener('keydown', handleEscape);
-
-		return () => document.removeEventListener('keydown', handleEscape);
-	}, [isMobileMenuOpen]);
-
-	useEffect(() => {
 		if (isMobileMenuOpen) {
+			document.addEventListener('keydown', handleKeyDown);
+			// Focus first navigation link when menu opens
 			const firstFocusable = sidebarRef.current?.querySelector(
 				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
 			) as HTMLElement;
 			firstFocusable?.focus();
 		}
+
+		return () => document.removeEventListener('keydown', handleKeyDown);
 	}, [isMobileMenuOpen]);
+
+	const closeMobileMenu = () => {
+		setIsMobileMenuOpen(false);
+		menuButtonRef.current?.focus();
+	};
 
 	const getLinkClasses = (href: string) => {
 		const isActive = pathname === href;
@@ -84,7 +83,6 @@ export const SideBar = () => {
 				className={`w-66 bg-accent fixed z-50 h-screen overflow-hidden px-6 pb-6 pt-16 transition-transform duration-300 ease-in-out md:pt-10 ${
 					isMobileMenuOpen ? 'flex translate-x-0' : '-translate-x-full'
 				} flex-col md:relative md:z-auto md:flex md:translate-x-0`}
-				aria-hidden={isMobileMenuOpen ? 'false' : 'true'}
 				aria-label='Main navigation'
 			>
 				{/* Close Button for Mobile */}
