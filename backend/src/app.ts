@@ -20,9 +20,12 @@ app.use(
 		contentSecurityPolicy: {
 			directives: {
 				defaultSrc: ["'self'"],
-				styleSrc: ["'self'", "'unsafe-inline'"],
-				scriptSrc: ["'self'"],
+				styleSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
+				scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://unpkg.com'],
 				imgSrc: ["'self'", 'data:', 'https:'],
+				fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
+				connectSrc: ["'self'"],
+				workerSrc: ["'self'", 'blob:'],
 			},
 		},
 	}),
