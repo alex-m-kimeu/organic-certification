@@ -26,6 +26,9 @@ import {
 	PaginationLink,
 	PaginationNext,
 	PaginationPrevious,
+	Tooltip,
+	TooltipTrigger,
+	TooltipContent,
 } from '@/components/ui';
 import { Sprout, Search, Edit, Trash2, Plus } from 'lucide-react';
 import type { Field } from '@/types/field';
@@ -252,9 +255,9 @@ export function FarmFieldsTab({ farmId, onDataChange }: FarmFieldsTabProps) {
 					{/* Controls Section */}
 					<div className='mb-6 flex flex-col gap-4' role='region' aria-label='Fields table controls'>
 						{/* Search and Sort Row */}
-						<div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+						<div className='flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
 							{/* Search Input */}
-							<div className='relative max-w-sm flex-1'>
+							<div className='relative max-w-lg flex-1'>
 								<label htmlFor='field-search' className='sr-only'>
 									Search fields by name or crop
 								</label>
@@ -283,7 +286,7 @@ export function FarmFieldsTab({ farmId, onDataChange }: FarmFieldsTabProps) {
 								<Select value={sortBy} onValueChange={setSortBy}>
 									<SelectTrigger
 										id='sort-select'
-										className='t-style-link border-border text-text-muted bg-accent focus-visible:border-primary focus-visible:ring-primary flex !h-10 w-[180px] items-center self-stretch rounded-lg border-0 px-2 shadow-none outline-none focus-visible:ring-[0.5px] focus-visible:ring-offset-0 md:!h-11 dark:border'
+										className='t-style-link border-border text-text-muted bg-accent focus-visible:border-primary focus-visible:ring-primary flex !h-10 !w-[200px] items-center self-stretch rounded-lg border-0 px-2 shadow-none outline-none focus-visible:ring-[0.5px] focus-visible:ring-offset-0 md:!h-11 dark:border'
 										aria-label='Sort fields by'
 									>
 										<SelectValue placeholder='Sort by' />
@@ -411,24 +414,38 @@ export function FarmFieldsTab({ farmId, onDataChange }: FarmFieldsTabProps) {
 											</TableCell>
 											<TableCell className='text-right'>
 												<div className='flex items-center justify-end gap-2'>
-													<Button
-														variant='ghost'
-														size='sm'
-														onClick={() => handleEditField(field)}
-														className='text-primary focus:ring-primary focus:ring-offset-background h-8 w-8 cursor-pointer p-0 focus:ring-[0.5px] focus:ring-offset-2'
-														aria-label={`Edit field ${field.name}`}
-													>
-														<Edit className='size-4' aria-hidden='true' />
-													</Button>
-													<Button
-														variant='ghost'
-														size='sm'
-														onClick={() => handleDeleteClick(field)}
-														className='text-error focus:ring-offset-background h-8 w-8 cursor-pointer p-0 focus:ring-[0.5px] focus:ring-red-500 focus:ring-offset-2'
-														aria-label={`Delete field ${field.name}`}
-													>
-														<Trash2 className='size-4' aria-hidden='true' />
-													</Button>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<Button
+																variant='ghost'
+																size='sm'
+																onClick={() => handleEditField(field)}
+																className='text-primary focus:ring-primary focus:ring-offset-background h-8 w-8 cursor-pointer p-0 focus:ring-[0.5px] focus:ring-offset-2'
+																aria-label={`Edit field ${field.name}`}
+															>
+																<Edit className='size-4' aria-hidden='true' />
+															</Button>
+														</TooltipTrigger>
+														<TooltipContent>
+															<p>Edit</p>
+														</TooltipContent>
+													</Tooltip>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<Button
+																variant='ghost'
+																size='sm'
+																onClick={() => handleDeleteClick(field)}
+																className='text-error focus:ring-offset-background h-8 w-8 cursor-pointer p-0 focus:ring-[0.5px] focus:ring-red-500 focus:ring-offset-2'
+																aria-label={`Delete field ${field.name}`}
+															>
+																<Trash2 className='size-4' aria-hidden='true' />
+															</Button>
+														</TooltipTrigger>
+														<TooltipContent>
+															<p>Delete</p>
+														</TooltipContent>
+													</Tooltip>
 												</div>
 											</TableCell>
 										</TableRow>
