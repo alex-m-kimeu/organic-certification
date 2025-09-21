@@ -17,9 +17,28 @@ interface CertificateData extends GenerateCertificateDto {
  * Generate certificate PDF buffer using Puppeteer
  */
 export const generateCertificatePdf = async (data: CertificateData): Promise<Buffer> => {
+	let browser;
 	try {
-		// Read the HTML template
-		const templatePath = path.join(__dirname, '../templates/certificate-template.html');
+		// Fix path resolution - try multiple paths for Docker compatibility
+		const possiblePaths = [
+			path.join(process.cwd(), 'src/templates/certificate-template.html'),
+			path.join(__dirname, '../templates/certificate-template.html'),
+			path.join(process.cwd(), 'dist/templates/certificate-template.html'),
+			path.join(process.cwd(), 'templates/certificate-template.html'),
+		];
+
+		let templatePath = null;
+		for (const path of possiblePaths) {
+			if (fs.existsSync(path)) {
+				templatePath = path;
+				break;
+			}
+		}
+
+		if (!templatePath) {
+			throw new Error(`Certificate template not found. Checked paths: ${possiblePaths.join(', ')}`);
+		}
+
 		let htmlContent = fs.readFileSync(templatePath, 'utf8');
 
 		// Replace template variables with actual data
@@ -41,9 +60,10 @@ export const generateCertificatePdf = async (data: CertificateData): Promise<Buf
 			htmlContent = htmlContent.replace(regex, value.toString());
 		}
 
-		// Launch Puppeteer browser
-		const browser = await puppeteer.launch({
-			headless: true,
+		// Enhanced Puppeteer configuration for Docker
+		browser = await puppeteer.launch({
+			headless: true, // Use standard headless mode
+			executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable',
 			args: [
 				'--no-sandbox',
 				'--disable-setuid-sandbox',
@@ -53,26 +73,41 @@ export const generateCertificatePdf = async (data: CertificateData): Promise<Buf
 				'--no-zygote',
 				'--single-process',
 				'--disable-gpu',
+				'--disable-web-security',
+				'--disable-features=VizDisplayCompositor',
+				'--disable-background-timer-throttling',
+				'--disable-backgrounding-occluded-windows',
+				'--disable-renderer-backgrounding',
+				'--disable-extensions',
+				'--disable-plugins',
+				'--disable-default-apps',
+				'--no-default-browser-check',
 			],
 		});
 
 		const page = await browser.newPage();
 
-		// Set the content
+		// Set viewport for consistent PDF generation
+		await page.setViewport({ width: 794, height: 1123 }); // A4 dimensions in pixels
+
+		// Set the content with better error handling
 		await page.setContent(htmlContent, {
-			waitUntil: 'networkidle0',
+			waitUntil: ['networkidle0', 'domcontentloaded'],
+			timeout: 30000, // 30 second timeout
 		});
 
-		// Generate PDF
+		// Generate PDF with optimized settings
 		const pdfBuffer = await page.pdf({
 			format: 'A4',
 			printBackground: true,
+			preferCSSPageSize: false,
 			margin: {
 				top: '0',
 				right: '0',
 				bottom: '0',
 				left: '0',
 			},
+			timeout: 30000, // 30 second timeout
 		});
 
 		// Close browser
@@ -80,6 +115,15 @@ export const generateCertificatePdf = async (data: CertificateData): Promise<Buf
 
 		return Buffer.from(pdfBuffer);
 	} catch (error) {
+		// Ensure browser is closed even if error occurs
+		if (browser) {
+			try {
+				await browser.close();
+			} catch {
+				// Silently handle browser close errors
+			}
+		}
+
 		throw new Error(
 			`Failed to generate certificate PDF: ${error instanceof Error ? error.message : 'Unknown error'}`,
 		);
