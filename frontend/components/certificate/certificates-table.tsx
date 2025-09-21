@@ -25,6 +25,9 @@ import {
 	PaginationNext,
 	PaginationPrevious,
 	Badge,
+	Tooltip,
+	TooltipTrigger,
+	TooltipContent,
 } from '@/components/ui';
 import { Search, Trash2, Download, Calendar, Clock, Award, MapPin } from 'lucide-react';
 import type { CertificateWithFarm } from '@/types/certificate';
@@ -152,9 +155,9 @@ export default function CertificatesTable({
 				{/* Controls Section */}
 				<div className='mb-6 flex flex-col gap-4' role='region' aria-label='Table controls'>
 					{/* Search and Sort Row */}
-					<div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+					<div className='flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
 						{/* Search Input */}
-						<div className='relative max-w-sm flex-1'>
+						<div className='relative max-w-lg flex-1'>
 							<label htmlFor='certificate-search' className='sr-only'>
 								Search certificates by number, farm name or farm name
 							</label>
@@ -183,7 +186,7 @@ export default function CertificatesTable({
 							<Select value={sortBy} onValueChange={setSortBy}>
 								<SelectTrigger
 									id='sort-select'
-									className='t-style-link border-border text-text-muted bg-accent focus-visible:border-primary focus-visible:ring-primary flex !h-10 w-[180px] items-center self-stretch rounded-lg border-0 px-2 shadow-none outline-none focus-visible:ring-[0.5px] focus-visible:ring-offset-0 md:!h-11 dark:border'
+									className='t-style-link border-border text-text-muted bg-accent focus-visible:border-primary focus-visible:ring-primary flex !h-10 !w-[200px] items-center self-stretch rounded-lg border-0 px-2 shadow-none outline-none focus-visible:ring-[0.5px] focus-visible:ring-offset-0 md:!h-11 dark:border'
 									aria-label='Sort certificates by'
 								>
 									<SelectValue placeholder='Sort by' />
@@ -327,24 +330,38 @@ export default function CertificatesTable({
 											<TableCell>{getCertificateStatusBadge(certificate.expiryDate)}</TableCell>
 											<TableCell className='text-right'>
 												<div className='flex items-center justify-end gap-2'>
-													<Button
-														variant='ghost'
-														size='sm'
-														onClick={() => onDownloadCertificate(certificate)}
-														className='text-primary focus:ring-primary focus:ring-offset-background h-8 w-8 cursor-pointer p-0 focus:ring-[0.5px] focus:ring-offset-2'
-														aria-label={`Download certificate ${certificate.certificateNo}`}
-													>
-														<Download className='size-4' aria-hidden='true' />
-													</Button>
-													<Button
-														variant='ghost'
-														size='sm'
-														onClick={() => onDeleteCertificate(certificate)}
-														className='text-error focus:ring-offset-background h-8 w-8 cursor-pointer p-0 focus:ring-[0.5px] focus:ring-red-500 focus:ring-offset-2'
-														aria-label={`Delete certificate ${certificate.certificateNo}`}
-													>
-														<Trash2 className='size-4' aria-hidden='true' />
-													</Button>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<Button
+																variant='ghost'
+																size='sm'
+																onClick={() => onDownloadCertificate(certificate)}
+																className='text-primary focus:ring-primary focus:ring-offset-background h-8 w-8 cursor-pointer p-0 focus:ring-[0.5px] focus:ring-offset-2'
+																aria-label={`Download certificate ${certificate.certificateNo}`}
+															>
+																<Download className='size-4' aria-hidden='true' />
+															</Button>
+														</TooltipTrigger>
+														<TooltipContent>
+															<p>Download</p>
+														</TooltipContent>
+													</Tooltip>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<Button
+																variant='ghost'
+																size='sm'
+																onClick={() => onDeleteCertificate(certificate)}
+																className='text-error focus:ring-offset-background h-8 w-8 cursor-pointer p-0 focus:ring-[0.5px] focus:ring-red-500 focus:ring-offset-2'
+																aria-label={`Delete certificate ${certificate.certificateNo}`}
+															>
+																<Trash2 className='size-4' aria-hidden='true' />
+															</Button>
+														</TooltipTrigger>
+														<TooltipContent>
+															<p>Delete</p>
+														</TooltipContent>
+													</Tooltip>
 												</div>
 											</TableCell>
 										</TableRow>

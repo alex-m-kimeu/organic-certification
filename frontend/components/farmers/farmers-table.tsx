@@ -26,6 +26,9 @@ import {
 	PaginationLink,
 	PaginationNext,
 	PaginationPrevious,
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
 } from '@/components/ui';
 import { Search, Trash2, Edit, Eye, Phone, Mail, MapPin, Calendar } from 'lucide-react';
 import type { Farmer } from '@/types/farmer';
@@ -156,9 +159,9 @@ export default function FarmersTable({
 				{/* Controls Section */}
 				<div className='mb-6 flex flex-col gap-4' role='region' aria-label='Table controls'>
 					{/* Search and Sort Row */}
-					<div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+					<div className='flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
 						{/* Search Input */}
-						<div className='relative max-w-sm flex-1'>
+						<div className='relative max-w-lg flex-1'>
 							<label htmlFor='farmer-search' className='sr-only'>
 								Search farmers by name, email, phone, or county
 							</label>
@@ -187,7 +190,7 @@ export default function FarmersTable({
 							<Select value={sortBy} onValueChange={setSortBy}>
 								<SelectTrigger
 									id='sort-select'
-									className='t-style-link border-border text-text-muted bg-accent focus-visible:border-primary focus-visible:ring-primary flex !h-10 w-[180px] items-center self-stretch rounded-lg border-0 px-2 shadow-none outline-none focus-visible:ring-[0.5px] focus-visible:ring-offset-0 md:!h-11 dark:border'
+									className='t-style-link border-border text-text-muted bg-accent focus-visible:border-primary focus-visible:ring-primary flex !h-10 !w-[200px] items-center self-stretch rounded-lg border-0 px-2 shadow-none outline-none focus-visible:ring-[0.5px] focus-visible:ring-offset-0 md:!h-11 dark:border'
 									aria-label='Sort farmers by'
 								>
 									<SelectValue placeholder='Sort by' />
@@ -320,36 +323,57 @@ export default function FarmersTable({
 										<TableCell className='text-right'>
 											<div className='flex items-center justify-end gap-2'>
 												{onViewFarmer && (
-													<Button
-														variant='ghost'
-														size='sm'
-														onClick={() => onViewFarmer(farmer)}
-														className='text-text-muted focus:ring-primary focus:ring-offset-background h-8 w-8 cursor-pointer p-0 focus:ring-[0.5px] focus:ring-offset-2'
-														aria-label={`View ${farmer.name} details`}
-													>
-														<Eye className='size-4' aria-hidden='true' />
-													</Button>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<Button
+																variant='ghost'
+																size='sm'
+																onClick={() => onViewFarmer(farmer)}
+																className='text-text-muted focus:ring-primary focus:ring-offset-background h-8 w-8 cursor-pointer p-0 focus:ring-[0.5px] focus:ring-offset-2'
+																aria-label={`View ${farmer.name} details`}
+															>
+																<Eye className='size-4' aria-hidden='true' />
+															</Button>
+														</TooltipTrigger>
+														<TooltipContent>
+															<p>View</p>
+														</TooltipContent>
+													</Tooltip>
 												)}
 												{onEditFarmer && (
-													<Button
-														variant='ghost'
-														size='sm'
-														onClick={() => onEditFarmer(farmer)}
-														className='text-primary focus:ring-primary focus:ring-offset-background h-8 w-8 cursor-pointer p-0 focus:ring-[0.5px] focus:ring-offset-2'
-														aria-label={`Edit ${farmer.name}`}
-													>
-														<Edit className='size-4' aria-hidden='true' />
-													</Button>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<Button
+																variant='ghost'
+																size='sm'
+																onClick={() => onEditFarmer(farmer)}
+																className='text-primary focus:ring-primary focus:ring-offset-background h-8 w-8 cursor-pointer p-0 focus:ring-[0.5px] focus:ring-offset-2'
+																aria-label={`Edit ${farmer.name}`}
+															>
+																<Edit className='size-4' aria-hidden='true' />
+															</Button>
+														</TooltipTrigger>
+														<TooltipContent>
+															<p>Edit</p>
+														</TooltipContent>
+													</Tooltip>
 												)}
-												<Button
-													variant='ghost'
-													size='sm'
-													onClick={() => onDeleteFarmer(farmer)}
-													className='text-error focus:ring-offset-background h-8 w-8 cursor-pointer p-0 focus:ring-[0.5px] focus:ring-red-500 focus:ring-offset-2'
-													aria-label={`Delete ${farmer.name}`}
-												>
-													<Trash2 className='size-4' aria-hidden='true' />
-												</Button>
+												<Tooltip>
+													<TooltipTrigger asChild>
+														<Button
+															variant='ghost'
+															size='sm'
+															onClick={() => onDeleteFarmer(farmer)}
+															className='text-error focus:ring-offset-background h-8 w-8 cursor-pointer p-0 focus:ring-[0.5px] focus:ring-red-500 focus:ring-offset-2'
+															aria-label={`Delete ${farmer.name}`}
+														>
+															<Trash2 className='size-4' aria-hidden='true' />
+														</Button>
+													</TooltipTrigger>
+													<TooltipContent>
+														<p>Delete</p>
+													</TooltipContent>
+												</Tooltip>
 											</div>
 										</TableCell>
 									</TableRow>
