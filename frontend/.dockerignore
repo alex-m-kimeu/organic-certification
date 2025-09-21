@@ -1,0 +1,43 @@
+# Node modules
+node_modules/
+npm-debug.log*
+
+# Next.js build outputs
+.next/
+out/
+
+# Environment files
+.env*
+!.env.example
+
+# Test files
+__tests__/
+coverage/
+jest.config.ts
+jest.setup.ts
+
+# Development files
+.eslintcache
+.eslintrc*
+.prettierrc*
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Vercel
+.vercel

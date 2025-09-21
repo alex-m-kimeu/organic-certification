@@ -1,0 +1,48 @@
+# Node modules
+node_modules/
+npm-debug.log*
+
+# Build outputs
+dist/
+*.tsbuildinfo
+
+# Environment files
+.env*
+!.env.example
+
+# Test files
+tests/
+coverage/
+jest.config.ts
+jest.setup.ts
+__tests__/
+
+# Development files
+.eslintcache
+.eslintrc*
+.prettierrc*
+nodemon.json
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Storage (will be mounted as volume)
+storage/
+
+# Scripts
+scripts/
