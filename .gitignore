@@ -18,3 +18,6 @@ yarn-error.log*
 
 # Database
 /postgres_data
+
+# test coverage
+/coverage

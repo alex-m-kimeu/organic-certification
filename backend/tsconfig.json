@@ -6,7 +6,6 @@
             "ES2022"
         ],
         "outDir": "./dist",
-        "rootDir": "./src",
         "strict": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
@@ -15,18 +14,22 @@
         "declaration": true,
         "declarationMap": true,
         "sourceMap": true,
+        "types": [
+            "jest",
+            "node"
+        ],
         "typeRoots": [
             "./node_modules/@types",
             "./src/types"
         ]
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "tests/**/*",
+        "jest.setup.ts"
     ],
     "exclude": [
         "node_modules",
-        "dist",
-        "**/*.test.ts",
-        "**/*.spec.ts"
+        "dist"
     ]
 }

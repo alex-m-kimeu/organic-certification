@@ -3,6 +3,7 @@
 
 # environment variables
 .env
+.env.test*
 
 # cache
 .eslintcache
@@ -12,3 +13,6 @@ storage/
 
 # prisma
 /src/generated/prisma
+
+# test coverage
+/coverage
