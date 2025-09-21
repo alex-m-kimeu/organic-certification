@@ -1,6 +1,8 @@
 import { config } from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 
+process.env.NODE_ENV = 'development';
+
 // Load test environment variables
 config({ path: '.env.test' });
 

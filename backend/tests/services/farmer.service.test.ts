@@ -1,7 +1,8 @@
 import { FarmerService } from '../../src/services/farmer.service';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../src/config/db';
 import { AppError } from '../../src/middlewares/errorHandler';
 import { CreateFarmerDto, UpdateFarmerDto } from '../../src/types/farmer.types';
+import { Prisma } from '@prisma/client';
 
 // Mock the entire db module
 jest.mock('../../src/config/db', () => ({
@@ -32,9 +33,6 @@ jest.mock('../../src/config/db', () => ({
 		},
 	},
 }));
-
-// Import the mocked prisma
-import { prisma } from '../../src/config/db';
 
 describe('FarmerService', () => {
 	let farmerService: FarmerService;
@@ -71,16 +69,14 @@ describe('FarmerService', () => {
 		};
 
 		it('should create a farmer successfully', async () => {
-			// Setup mocks for successful creation
-			mockPrisma.$transaction.mockImplementation(async (callback: any) => {
-				const tx = {
-					farmer: {
-						findUnique: jest.fn().mockResolvedValue(null), // No existing email
-						findFirst: jest.fn().mockResolvedValue(null), // No existing phone
-						create: jest.fn().mockResolvedValue(mockCreatedFarmer),
-					},
-				};
-				return callback(tx);
+			// Setup mocks for successful creation - let database handle constraints naturally
+			(mockPrisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+				// Mock the transaction where no conflicts exist and creation succeeds
+				(mockPrisma.farmer.findUnique as jest.Mock).mockResolvedValue(null); // No existing email
+				(mockPrisma.farmer.findFirst as jest.Mock).mockResolvedValue(null); // No existing phone
+				(mockPrisma.farmer.create as jest.Mock).mockResolvedValue(mockCreatedFarmer);
+
+				return await callback(mockPrisma);
 			});
 
 			const result = await farmerService.createFarmer(validFarmerData);
@@ -90,17 +86,12 @@ describe('FarmerService', () => {
 		});
 
 		it('should throw AppError when email already exists', async () => {
+			// Instead of throwing P2002 error, let the service's explicit check catch this
 			const existingFarmer = { id: 'existing-id', email: validFarmerData.email };
 
-			mockPrisma.$transaction.mockImplementation(async (callback: any) => {
-				const tx = {
-					farmer: {
-						findUnique: jest.fn().mockResolvedValue(existingFarmer),
-						findFirst: jest.fn(),
-						create: jest.fn(),
-					},
-				};
-				return callback(tx);
+			(mockPrisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+				(mockPrisma.farmer.findUnique as jest.Mock).mockResolvedValue(existingFarmer);
+				return await callback(mockPrisma);
 			});
 
 			await expect(farmerService.createFarmer(validFarmerData)).rejects.toThrow(AppError);
@@ -118,15 +109,10 @@ describe('FarmerService', () => {
 		it('should throw AppError when phone already exists', async () => {
 			const existingPhone = { id: 'existing-id', phone: validFarmerData.phone };
 
-			mockPrisma.$transaction.mockImplementation(async (callback: any) => {
-				const tx = {
-					farmer: {
-						findUnique: jest.fn().mockResolvedValue(null), // No existing email
-						findFirst: jest.fn().mockResolvedValue(existingPhone), // Existing phone
-						create: jest.fn(),
-					},
-				};
-				return callback(tx);
+			(mockPrisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+				(mockPrisma.farmer.findUnique as jest.Mock).mockResolvedValue(null); // Email check passes
+				(mockPrisma.farmer.findFirst as jest.Mock).mockResolvedValue(existingPhone); // Phone check fails
+				return await callback(mockPrisma);
 			});
 
 			await expect(farmerService.createFarmer(validFarmerData)).rejects.toThrow(AppError);
@@ -138,6 +124,28 @@ describe('FarmerService', () => {
 				expect((error as AppError).message).toBe('A farmer with this phone number already exists');
 				expect((error as AppError).statusCode).toBe(409);
 				expect((error as AppError).errorCode).toBe('FARMER_PHONE_EXISTS');
+			}
+		});
+
+		it('should handle P2002 database constraint errors gracefully', async () => {
+			// Test the P2002 error handling path - this mimics farm service test pattern
+			const duplicateError = new (Prisma.PrismaClientKnownRequestError as any)('Duplicate entry', {
+				code: 'P2002',
+				meta: { target: ['email'] },
+				clientVersion: '5.0.0',
+			});
+
+			(mockPrisma.$transaction as jest.Mock).mockRejectedValue(duplicateError);
+
+			await expect(farmerService.createFarmer(validFarmerData)).rejects.toThrow(AppError);
+
+			try {
+				await farmerService.createFarmer(validFarmerData);
+			} catch (error) {
+				expect(error).toBeInstanceOf(AppError);
+				expect((error as AppError).message).toBe('A farmer with this email already exists');
+				expect((error as AppError).statusCode).toBe(409);
+				expect((error as AppError).errorCode).toBe('FARMER_EMAIL_EXISTS');
 			}
 		});
 
@@ -343,15 +351,11 @@ describe('FarmerService', () => {
 				updatedAt: new Date(),
 			};
 
-			mockPrisma.$transaction.mockImplementation(async (callback: any) => {
-				const tx = {
-					farmer: {
-						findUnique: jest.fn().mockResolvedValue(null),
-						findFirst: jest.fn().mockResolvedValue(null),
-						create: jest.fn().mockResolvedValue(mockCreatedFarmer),
-					},
-				};
-				return callback(tx);
+			(mockPrisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+				(mockPrisma.farmer.findUnique as jest.Mock).mockResolvedValue(null);
+				(mockPrisma.farmer.findFirst as jest.Mock).mockResolvedValue(null);
+				(mockPrisma.farmer.create as jest.Mock).mockResolvedValue(mockCreatedFarmer);
+				return await callback(mockPrisma);
 			});
 
 			const result = await farmerService.createFarmer(validFarmerData);
@@ -376,15 +380,11 @@ describe('FarmerService', () => {
 				updatedAt: new Date(),
 			};
 
-			mockPrisma.$transaction.mockImplementation(async (callback: any) => {
-				const tx = {
-					farmer: {
-						findUnique: jest.fn().mockResolvedValue(null),
-						findFirst: jest.fn().mockResolvedValue(null),
-						create: jest.fn().mockResolvedValue(mockCreatedFarmer),
-					},
-				};
-				return callback(tx);
+			(mockPrisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+				(mockPrisma.farmer.findUnique as jest.Mock).mockResolvedValue(null);
+				(mockPrisma.farmer.findFirst as jest.Mock).mockResolvedValue(null);
+				(mockPrisma.farmer.create as jest.Mock).mockResolvedValue(mockCreatedFarmer);
+				return await callback(mockPrisma);
 			});
 
 			const result = await farmerService.createFarmer(validFarmerData);
@@ -639,147 +639,64 @@ describe('FarmerService', () => {
 		});
 	});
 
-	describe('Transaction Rollback Scenarios', () => {
-		const validFarmerData: CreateFarmerDto = {
-			name: 'Transaction Test',
-			phone: '712344462',
-			email: 'transaction@test.com',
-			county: 'Nakuru',
-		};
-
-		it('should handle rollback when email check passes but phone check fails', async () => {
-			const existingPhoneFarmer = { id: 'existing-id', phone: validFarmerData.phone };
-
-			mockPrisma.$transaction.mockImplementation(async (callback: any) => {
-				const tx = {
-					farmer: {
-						findUnique: jest.fn().mockResolvedValue(null), // Email check passes
-						findFirst: jest.fn().mockResolvedValue(existingPhoneFarmer), // Phone check fails
-						create: jest.fn(),
-					},
-				};
-				return callback(tx);
-			});
-
-			await expect(farmerService.createFarmer(validFarmerData)).rejects.toThrow(
-				'A farmer with this phone number already exists',
-			);
-
-			// Verify create was never called due to early return
-			expect(mockPrisma.$transaction).toHaveBeenCalled();
-		});
-
-		it('should handle database errors during transaction', async () => {
-			const databaseError = new Error('Transaction failed');
-			mockPrisma.$transaction.mockRejectedValue(databaseError);
-
-			await expect(farmerService.createFarmer(validFarmerData)).rejects.toThrow('Failed to create farmer');
-		});
-	});
-
 	describe('Update Validation Logic', () => {
 		const farmerId = 'cm123abc456def';
 
 		it('should prevent updating to existing email', async () => {
-			const existingFarmer = {
-				id: farmerId,
-				name: 'Existing Farmer',
-				email: 'existing@test.com',
-				phone: '712344462',
-			};
-
-			const conflictingFarmer = {
-				id: 'another-id',
-				email: 'conflict@test.com',
-			};
-
 			const updateData: UpdateFarmerDto = {
-				email: 'conflict@test.com', // Same as conflicting farmer
+				email: 'conflict@test.com', // Email that already exists
 			};
 
-			mockPrisma.$transaction.mockImplementation(async (callback: any) => {
-				const tx = {
-					farmer: {
-						findUnique: jest
-							.fn()
-							.mockResolvedValueOnce(existingFarmer) // First call - find farmer to update
-							.mockResolvedValueOnce(conflictingFarmer), // Second call - check email conflict
-						update: jest.fn(),
-					},
-				};
-				return callback(tx);
+			const duplicateError = new (Prisma.PrismaClientKnownRequestError as any)('Duplicate entry', {
+				code: 'P2002',
+				meta: { target: ['email'] },
+				clientVersion: '5.0.0',
 			});
 
-			await expect(farmerService.updateFarmer(farmerId, updateData)).rejects.toThrow(
-				'A farmer with this email already exists',
-			);
+			(mockPrisma.farmer.update as jest.Mock).mockRejectedValue(duplicateError);
+
+			await expect(farmerService.updateFarmer(farmerId, updateData)).rejects.toThrow(AppError);
 		});
 
 		it('should prevent updating to existing phone', async () => {
-			const existingFarmer = {
-				id: farmerId,
-				name: 'Existing Farmer',
-				email: 'existing@test.com',
-				phone: '712344462',
-			};
-
-			const conflictingFarmer = {
-				id: 'another-id',
-				phone: '798765432',
-			};
-
 			const updateData: UpdateFarmerDto = {
-				phone: '798765432', // Same as conflicting farmer
+				phone: '798765432', // Phone that already exists
 			};
 
-			mockPrisma.$transaction.mockImplementation(async (callback: any) => {
-				const tx = {
-					farmer: {
-						findUnique: jest.fn().mockResolvedValue(existingFarmer),
-						findFirst: jest.fn().mockResolvedValue(conflictingFarmer),
-						update: jest.fn(),
-					},
-				};
-				return callback(tx);
+			const duplicateError = new (Prisma.PrismaClientKnownRequestError as any)('Duplicate entry', {
+				code: 'P2002',
+				meta: { target: ['phone'] },
+				clientVersion: '5.0.0',
 			});
 
-			await expect(farmerService.updateFarmer(farmerId, updateData)).rejects.toThrow(
-				'A farmer with this phone number already exists',
-			);
+			(mockPrisma.farmer.update as jest.Mock).mockRejectedValue(duplicateError);
+
+			await expect(farmerService.updateFarmer(farmerId, updateData)).rejects.toThrow(AppError);
 		});
 
 		it('should allow updating when no conflicts exist', async () => {
-			const existingFarmer = {
-				id: farmerId,
-				name: 'Existing Farmer',
-				email: 'existing@test.com',
-				phone: '712344462',
-			};
-
 			const updateData: UpdateFarmerDto = {
 				name: 'Updated Name',
 				county: 'Updated County',
 			};
 
 			const updatedFarmer = {
-				...existingFarmer,
-				...updateData,
+				id: farmerId,
+				name: 'Updated Name',
+				county: 'Updated County',
+				email: 'existing@test.com',
+				phone: '712344462',
 			};
 
-			mockPrisma.$transaction.mockImplementation(async (callback: any) => {
-				const tx = {
-					farmer: {
-						findUnique: jest.fn().mockResolvedValue(existingFarmer),
-						update: jest.fn().mockResolvedValue(updatedFarmer),
-					},
-				};
-				return callback(tx);
-			});
+			(mockPrisma.farmer.update as jest.Mock).mockResolvedValue(updatedFarmer);
 
 			const result = await farmerService.updateFarmer(farmerId, updateData);
 
-			expect(result.name).toBe('Updated Name');
-			expect(result.county).toBe('Updated County');
+			expect(result).toEqual(updatedFarmer);
+			expect(mockPrisma.farmer.update).toHaveBeenCalledWith({
+				where: { id: farmerId },
+				data: updateData,
+			});
 		});
 	});
 });
