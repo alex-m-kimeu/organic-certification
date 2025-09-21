@@ -378,6 +378,7 @@ export class InspectionController {
 		res.json({
 			success: true,
 			message: 'Inspection deleted successfully',
+			data: null,
 		});
 	});
 
