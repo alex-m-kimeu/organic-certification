@@ -1,57 +1,56 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
 import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
-	DialogTrigger,
 	DialogFooter,
+	Button,
 	Form,
 	FormControl,
 	FormField,
 	FormItem,
 	FormLabel,
 	FormMessage,
+	Input,
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-	Button,
-	Input,
 } from '@/components/ui';
-import { toast } from 'sonner';
 import { LuLoaderCircle } from 'react-icons/lu';
-import { IoAdd } from 'react-icons/io5';
-import { createFarmerSchema, KENYAN_COUNTIES, type CreateFarmer } from '@/lib/validations/farmer';
-import type { Farmer } from '@/types/farmer';
+import type { Field } from '@/types/field';
+import { createFieldSchema, type CreateField, COMMON_CROPS } from '@/lib/validations/field.validation';
 import { cn } from '@/lib/utils';
 
-interface FarmerDialogProps {
-	farmer?: Farmer | null;
-	onFarmerAdded: () => void;
+interface FieldDialogProps {
+	field?: Field | null;
+	farmId: string;
+	isOpen?: boolean;
+	onFieldAdded: () => void;
 	onClose?: () => void;
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function FarmerDialog({ farmer, onFarmerAdded, onClose }: FarmerDialogProps) {
-	const [isOpen, setIsOpen] = useState(false);
+export default function FieldDialog({ field, farmId, isOpen = false, onFieldAdded, onClose }: FieldDialogProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const isEditing = !!farmer;
+	const isEditing = !!field;
 
-	const form = useForm<CreateFarmer>({
-		resolver: zodResolver(createFarmerSchema),
+	const form = useForm<CreateField>({
+		resolver: zodResolver(createFieldSchema),
 		defaultValues: {
+			farmId: farmId,
 			name: '',
-			phone: '',
-			email: '',
-			county: '',
+			crop: 'Maize',
+			areaHa: 0,
 		},
 		mode: 'onChange',
 	});
@@ -61,30 +60,29 @@ export default function FarmerDialog({ farmer, onFarmerAdded, onClose }: FarmerD
 	} = form;
 
 	useEffect(() => {
-		if (farmer) {
+		if (field) {
 			form.reset({
-				name: farmer.name,
-				phone: farmer.phone.replace('+254', ''),
-				email: farmer.email,
-				county: farmer.county,
+				farmId: field.farmId,
+				name: field.name,
+				crop: field.crop as (typeof COMMON_CROPS)[number],
+				areaHa: field.areaHa,
 			});
-			setIsOpen(true);
 		} else {
 			form.reset({
+				farmId: farmId,
 				name: '',
-				phone: '',
-				email: '',
-				county: '',
+				crop: 'Maize',
+				areaHa: 0,
 			});
 		}
-	}, [farmer, form]);
+	}, [field, farmId, form]);
 
 	// Form submission handler
-	const onSubmit = async (values: CreateFarmer) => {
+	const onSubmit = async (values: CreateField) => {
 		setIsSubmitting(true);
 
 		try {
-			const url = isEditing ? `${BASE_URL}/farmers/${farmer?.id}` : `${BASE_URL}/farmers`;
+			const url = isEditing ? `${BASE_URL}/fields/${field.id}` : `${BASE_URL}/fields`;
 			const method = isEditing ? 'PATCH' : 'POST';
 
 			const response = await fetch(url, {
@@ -97,25 +95,19 @@ export default function FarmerDialog({ farmer, onFarmerAdded, onClose }: FarmerD
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				throw new Error(errorData.message || `Failed to ${isEditing ? 'update' : 'create'} farmer`);
+				throw new Error(errorData.message || `Failed to ${isEditing ? 'update' : 'create'} field`);
 			}
 
-			toast.success(`Farmer ${isEditing ? 'updated' : 'created'} successfully!`);
-
-			form.reset();
-			setIsOpen(false);
-
-			onFarmerAdded();
-
-			if (onClose) {
-				onClose();
+			const result = await response.json();
+			if (result.success) {
+				toast.success(`Field ${isEditing ? 'updated' : 'created'} successfully!`);
+				handleClose();
+				onFieldAdded();
+			} else {
+				throw new Error(result.message || `Failed to ${isEditing ? 'update' : 'create'} field`);
 			}
 		} catch (error) {
-			const errorMessage =
-				error instanceof Error
-					? error.message
-					: `Failed to ${isEditing ? 'update' : 'create'} farmer. Please try again.`;
-
+			const errorMessage = error instanceof Error ? error.message : 'Failed to save field. Please try again.';
 			toast.error(errorMessage);
 		} finally {
 			setIsSubmitting(false);
@@ -124,12 +116,15 @@ export default function FarmerDialog({ farmer, onFarmerAdded, onClose }: FarmerD
 
 	const handleClose = () => {
 		if (!isSubmitting) {
-			setIsOpen(false);
-			form.reset();
-
 			if (onClose) {
 				onClose();
 			}
+			form.reset({
+				farmId: farmId,
+				name: '',
+				crop: 'Maize',
+				areaHa: 0,
+			});
 		}
 	};
 
@@ -139,27 +134,16 @@ export default function FarmerDialog({ farmer, onFarmerAdded, onClose }: FarmerD
 			onOpenChange={(open) => {
 				if (!open) {
 					handleClose();
-				} else if (!isEditing) {
-					setIsOpen(true);
 				}
 			}}
 		>
-			{!isEditing && (
-				<DialogTrigger asChild>
-					<Button className='t-style-link rounded-2 bg-primary hover:bg-primary/70 focus:ring-primary focus:ring-offset-background flex cursor-pointer items-center justify-center px-4 py-2 text-white shadow-none transition-all focus:ring-[0.5px] focus:ring-offset-2'>
-						<IoAdd className='mr-1 h-4 w-4' aria-hidden='true' />
-						Add New Farmer
-					</Button>
-				</DialogTrigger>
-			)}
-
 			<DialogContent className='bg-accent animate-fadeIn gap-6 rounded-lg border-none shadow-md sm:max-w-[500px] dark:shadow-none'>
 				<DialogHeader>
 					<DialogTitle className='t-style-h3 text-primary !font-bold'>
-						{isEditing ? 'Edit Farmer' : 'Add New Farmer'}
+						{isEditing ? 'Edit Field' : 'Add New Field'}
 					</DialogTitle>
 					<p className='t-style-caption text-text-muted'>
-						{isEditing ? 'Update farmer details below' : 'Fill in the details to add a new farmer'}
+						{isEditing ? 'Update field details below' : 'Fill in the details to add a new field'}
 						<span className='sr-only'>. All fields marked with asterisk are required.</span>
 					</p>
 				</DialogHeader>
@@ -169,23 +153,23 @@ export default function FarmerDialog({ farmer, onFarmerAdded, onClose }: FarmerD
 						onSubmit={form.handleSubmit(onSubmit)}
 						className='flex flex-col items-start gap-[24px] self-stretch'
 						noValidate
-						aria-label={isEditing ? 'Edit farmer form' : 'Add new farmer form'}
+						aria-label={isEditing ? 'Edit field form' : 'Add new field form'}
 					>
-						{/* Name */}
+						{/* Field Name */}
 						<FormField
 							control={form.control}
 							name='name'
 							render={({ field, fieldState }) => (
 								<FormItem className='flex w-full flex-col gap-[8px] space-y-0'>
 									<FormLabel className='t-style-link text-text-muted self-stretch !font-semibold'>
-										Full Name
+										Field Name
 										<span className='text-error' aria-label='required'>
 											*
 										</span>
 									</FormLabel>
 									<FormControl>
 										<Input
-											placeholder="Enter farmer's full name"
+											placeholder='e.g., North Field, Block A'
 											className='t-style-link rounded-2 border-border text-text-muted placeholder:text-text-muted/70 focus-visible:border-primary focus-visible:ring-primary flex h-10 items-center self-stretch border px-2 shadow-none outline-none focus-visible:ring-[0.5px] focus-visible:ring-offset-0 md:h-11'
 											{...field}
 											disabled={isSubmitting}
@@ -198,118 +182,81 @@ export default function FarmerDialog({ farmer, onFarmerAdded, onClose }: FarmerD
 							)}
 						/>
 
-						{/* Phone */}
+						{/* Crop Type */}
 						<FormField
 							control={form.control}
-							name='phone'
+							name='crop'
 							render={({ field, fieldState }) => (
 								<FormItem className='flex w-full flex-col gap-[8px] space-y-0'>
 									<FormLabel className='t-style-link text-text-muted self-stretch !font-semibold'>
-										Phone
+										Crop Type
 										<span className='text-error' aria-label='required'>
 											*
 										</span>
 									</FormLabel>
 									<FormControl>
-										<div className='relative w-full'>
-											<div
-												className='t-style-link text-text-muted pointer-events-none absolute left-3 top-1/2 z-10 flex -translate-y-1/2 items-center'
-												aria-hidden='true'
-											>
-												🇰🇪 +254
-											</div>
-											<Input
-												type='tel'
-												placeholder='712345678'
-												className='t-style-link rounded-2 border-border text-text-muted placeholder:text-text-muted/70 focus-visible:border-primary focus-visible:ring-primary flex h-10 items-center self-stretch border pl-20 pr-2 shadow-none outline-none focus-visible:ring-[0.5px] focus-visible:ring-offset-0 md:h-11'
-												{...field}
-												disabled={isSubmitting}
+										<Select
+											value={field.value}
+											onValueChange={field.onChange}
+											disabled={isSubmitting}
+										>
+											<SelectTrigger
+												className='t-style-link rounded-2 border-border text-text-muted focus-visible:border-primary focus-visible:ring-primary flex !h-10 w-full items-center self-stretch border px-2 shadow-none outline-none focus-visible:ring-[0.5px] focus-visible:ring-offset-0 md:!h-11'
 												aria-invalid={fieldState.invalid}
-												aria-describedby={`phone-description ${fieldState.error ? 'phone-error' : ''}`}
-												onChange={(e) => {
-													const value = e.target.value.replace(/\D/g, '').slice(0, 9);
-													field.onChange(value);
-												}}
-											/>
-											<div id='phone-description' className='sr-only'>
-												Enter phone number without country code. Kenya country code +254 will be
-												added automatically.
-											</div>
-										</div>
+												aria-describedby={fieldState.error ? `crop-error` : undefined}
+											>
+												<SelectValue
+													placeholder='Select crop type'
+													className='placeholder:text-text-muted/70'
+												/>
+											</SelectTrigger>
+											<SelectContent className='bg-accent border-border w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] border shadow-md'>
+												{COMMON_CROPS.map((crop) => (
+													<SelectItem key={crop} value={crop} className='text-text-muted'>
+														{crop}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
 									</FormControl>
-									<FormMessage className='t-style-caption text-error' id='phone-error' role='alert' />
+									<FormMessage className='t-style-caption text-error' id='crop-error' role='alert' />
 								</FormItem>
 							)}
 						/>
 
-						{/* Email */}
+						{/* Area in Hectares */}
 						<FormField
 							control={form.control}
-							name='email'
+							name='areaHa'
 							render={({ field, fieldState }) => (
 								<FormItem className='flex w-full flex-col gap-[8px] space-y-0'>
 									<FormLabel className='t-style-link text-text-muted self-stretch !font-semibold'>
-										Email
+										Area (Hectares)
 										<span className='text-error' aria-label='required'>
 											*
 										</span>
 									</FormLabel>
 									<FormControl>
 										<Input
-											type='email'
-											placeholder='farmer@example.com'
+											type='number'
+											step='0.001'
+											min='0'
+											max='10000'
+											placeholder='e.g., 2.5'
 											className='t-style-link rounded-2 border-border text-text-muted placeholder:text-text-muted/70 focus-visible:border-primary focus-visible:ring-primary flex h-10 items-center self-stretch border px-2 shadow-none outline-none focus-visible:ring-[0.5px] focus-visible:ring-offset-0 md:h-11'
-											{...field}
 											disabled={isSubmitting}
 											aria-invalid={fieldState.invalid}
-											aria-describedby={fieldState.error ? `email-error` : undefined}
+											aria-describedby={fieldState.error ? `areaHa-error` : undefined}
+											onChange={(e) => {
+												const value = e.target.value;
+												field.onChange(value === '' ? '' : parseFloat(value));
+											}}
+											value={field.value || ''}
 										/>
 									</FormControl>
-									<FormMessage className='t-style-caption text-error' id='email-error' role='alert' />
-								</FormItem>
-							)}
-						/>
-
-						{/* County */}
-						<FormField
-							control={form.control}
-							name='county'
-							render={({ field, fieldState }) => (
-								<FormItem className='flex w-full flex-col gap-[8px] space-y-0'>
-									<FormLabel className='t-style-link text-text-muted self-stretch !font-semibold'>
-										County
-										<span className='text-error' aria-label='required'>
-											*
-										</span>
-									</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										defaultValue={field.value}
-										disabled={isSubmitting}
-									>
-										<FormControl>
-											<SelectTrigger
-												className='t-style-link rounded-2 border-border text-text-muted focus-visible:border-primary focus-visible:ring-primary flex !h-10 w-full items-center self-stretch border px-2 shadow-none outline-none focus-visible:ring-[0.5px] focus-visible:ring-offset-0 md:!h-11'
-												aria-invalid={fieldState.invalid}
-												aria-describedby={fieldState.error ? `county-error` : undefined}
-											>
-												<SelectValue
-													placeholder='Select county'
-													className='placeholder:text-text-muted/70'
-												/>
-											</SelectTrigger>
-										</FormControl>
-										<SelectContent className='bg-accent border-border w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] border shadow-md'>
-											{KENYAN_COUNTIES.map((county) => (
-												<SelectItem key={county} value={county} className='text-text-muted'>
-													{county}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
 									<FormMessage
 										className='t-style-caption text-error'
-										id='county-error'
+										id='areaHa-error'
 										role='alert'
 									/>
 								</FormItem>
@@ -333,8 +280,8 @@ export default function FarmerDialog({ farmer, onFarmerAdded, onClose }: FarmerD
 								aria-describedby={isSubmitting ? 'submit-status' : undefined}
 								aria-label={
 									isSubmitting
-										? `${isEditing ? 'Updating' : 'Creating'} farmer, please wait`
-										: `${isEditing ? 'Update' : 'Create'} farmer${isFormValid ? '' : ' (form has errors)'}`
+										? `${isEditing ? 'Updating' : 'Creating'} field, please wait`
+										: `${isEditing ? 'Update' : 'Create'} field${isFormValid ? '' : ' (form has errors)'}`
 								}
 								className={cn(
 									't-style-link rounded-2 focus:ring-primary focus:ring-offset-accent flex flex-1 items-center justify-center px-4 py-2 text-white shadow-none transition-all focus:ring-[0.5px] focus:ring-offset-2',
@@ -351,11 +298,11 @@ export default function FarmerDialog({ farmer, onFarmerAdded, onClose }: FarmerD
 										? 'Updating...'
 										: 'Creating...'
 									: isEditing
-										? 'Update Farmer'
-										: 'Create Farmer'}
+										? 'Update Field'
+										: 'Create Field'}
 								{isSubmitting && (
 									<span id='submit-status' className='sr-only' aria-live='polite'>
-										{isEditing ? 'Updating farmer details' : 'Creating new farmer'}
+										{isEditing ? 'Updating field details' : 'Creating new field'}
 									</span>
 								)}
 							</Button>
