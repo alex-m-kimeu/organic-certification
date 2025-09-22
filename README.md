@@ -25,6 +25,13 @@ This is a monorepo containing:
 - **Storage**: Cloudinary for PDF certificates and file management with local storage as fallback
 - **Deployment**: Docker containers on Digital Ocean
 
+### 📊 System Architecture Diagrams
+
+Visual representations of the system architecture and workflow:
+
+- **[UML Class Diagram](docs/diagrams/Class-Diagram.png)** - Entity relationships and data model structure
+- **[UML Sequence Diagram](docs/diagrams/Sequence-Diagram.png)** - Inspection submission to certificate generation workflow
+
 ## ✨ Features
 
 ### Core Functionality
