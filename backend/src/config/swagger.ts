@@ -15,7 +15,7 @@ const swaggerOptions: swaggerJsdoc.Options = {
         - Generate and manage organic certificates
         
         ## Rate Limiting
-        - General endpoints: 100 requests per 15 minutes per IP
+        - General endpoints: 1000 requests per 15 minutes per IP
         
         ## Error Responses
         All error responses follow a consistent format:
