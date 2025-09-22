@@ -13,7 +13,7 @@ A comprehensive full-stack application for managing organic farm certification p
 
 https://github.com/user-attachments/assets/b788dc30-e833-4fb9-ba53-add10b6da857
 
-A comprehensive demo showcasing the complete organic certification workflow including farmer registration, farm management, field tracking, inspection processes, and certificate generation. For a complete experince visit the live link above and have fun interating with it☝🏾
+_A comprehensive demo showcasing the complete organic certification workflow including farmer registration, farm management, field tracking, inspection processes, and certificate generation. For a complete experince visit the live link above☝🏾 and have fun interating with it_
 
 ## 🏗️ Architecture
 
