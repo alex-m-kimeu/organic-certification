@@ -41,8 +41,8 @@ const swaggerOptions: swaggerJsdoc.Options = {
 		},
 		servers: [
 			{
-				url: process.env.API_BASE_URL || 'http://localhost:8080',
-				description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server',
+				url: 'https://organiccertifications.online',
+				description: 'Production server',
 			},
 		],
 		components: {
