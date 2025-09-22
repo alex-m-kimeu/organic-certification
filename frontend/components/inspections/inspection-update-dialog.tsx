@@ -215,7 +215,7 @@ export default function InspectionUpdateDialog({
 				}
 			}}
 		>
-			<DialogContent className='bg-accent animate-fadeIn !h-[90vh] !max-h-none !w-[90vw] !max-w-none gap-4 overflow-y-auto rounded-lg border-none shadow-md lg:!w-[65vw] dark:shadow-none'>
+			<DialogContent className='bg-accent animate-fadeIn !h-[90vh] !max-h-none !w-[90vw] !max-w-none gap-4 overflow-y-auto rounded-lg border-none px-5 py-8 shadow-md lg:!w-[65vw] lg:px-6 lg:py-6 dark:shadow-none'>
 				<DialogHeader>
 					<DialogTitle className='t-style-h3 text-primary flex items-center gap-2 !font-bold'>
 						<ClipboardCheck className='text-primary size-6' />
@@ -270,20 +270,20 @@ export default function InspectionUpdateDialog({
 
 						{/* Inspection Checklist */}
 						<Card className='bg-accent text-text-muted flex w-full flex-col gap-6 rounded-none border-none py-0 shadow-none'>
-							<CardHeader className='p-0'>
-								<div className='flex items-center justify-between'>
+							<CardHeader className='!items-center p-0 md:!items-start'>
+								<div className='flex flex-col items-center justify-normal gap-2 md:flex-row md:justify-between md:gap-1'>
 									<CardTitle className='text-xl font-bold'>Update Inspection Checklist</CardTitle>
-									<div className='text-right'>
+									<div className='space-y-1 text-center md:text-right'>
 										<div className='text-primary text-lg font-bold'>
 											Compliance: {getCompliancePercentage()}%
 										</div>
-										<div className='text-muted-foreground text-sm'>
+										<div className='text-text-muted text-sm'>
 											{answers.filter((a) => a.answer === true).length} Yes /{' '}
 											{answers.filter((a) => a.answer !== null).length} Answered
 										</div>
 									</div>
 								</div>
-								<div className='mt-2'>
+								<div className='mt-2 text-center md:text-start'>
 									<div
 										className={`text-sm font-medium ${answers.filter((a) => a.answer !== null).length >= 5 ? 'text-green-600' : 'text-red-600'}`}
 									>
@@ -294,135 +294,213 @@ export default function InspectionUpdateDialog({
 							</CardHeader>
 							<CardContent className='p-0'>
 								{isLoading ? (
-									<div className='text-muted-foreground py-12 text-center text-lg'>
-										<div className='border-primary mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent' />
+									<div className='text-text-muted t-style-caption py-12 text-center'>
 										Loading inspection questions...
 									</div>
 								) : questions.length > 0 ? (
-									<div className='overflow-hidden'>
-										<Table>
-											<TableHeader className='bg-primary'>
-												<TableRow className='border-none'>
-													<TableHead className='t-style-link h-11 rounded-tl-lg !font-semibold text-white'>
-														No
-													</TableHead>
-													<TableHead className='t-style-link h-11 !font-semibold text-white'>
-														Question & Description
-													</TableHead>
-													<TableHead className='t-style-link h-11 px-4 !font-semibold text-white'>
-														Yes
-													</TableHead>
-													<TableHead className='t-style-link h-11 px-4 !font-semibold text-white'>
-														No
-													</TableHead>
-													<TableHead className='t-style-link h-11 rounded-tr-lg px-4 !font-semibold text-white'>
-														Skip
-													</TableHead>
-												</TableRow>
-											</TableHeader>
-											<TableBody>
-												{questions.map((question) => {
-													const answer = answers.find((a) => a.questionId === question.id);
+									<>
+										{/* Table Layout for Large Devices */}
+										<div className='hidden overflow-hidden lg:block'>
+											<Table>
+												<TableHeader className='bg-primary'>
+													<TableRow className='border-none'>
+														<TableHead className='t-style-link h-11 rounded-tl-lg !font-semibold text-white'>
+															No
+														</TableHead>
+														<TableHead className='t-style-link h-11 !font-semibold text-white'>
+															Question & Description
+														</TableHead>
+														<TableHead className='t-style-link h-11 px-4 !font-semibold text-white'>
+															Yes
+														</TableHead>
+														<TableHead className='t-style-link h-11 px-4 !font-semibold text-white'>
+															No
+														</TableHead>
+														<TableHead className='t-style-link h-11 rounded-tr-lg px-4 !font-semibold text-white'>
+															Skip
+														</TableHead>
+													</TableRow>
+												</TableHeader>
+												<TableBody>
+													{questions.map((question) => {
+														const answer = answers.find(
+															(a) => a.questionId === question.id,
+														);
 
-													return (
-														<TableRow
-															key={question.id}
-															className='border-border/40 dark:border-border'
-														>
-															<TableCell>
-																<div className='bg-primary/10 text-primary t-style-caption flex h-8 w-8 items-center justify-center rounded-full !font-bold'>
-																	{question.order}
-																</div>
-															</TableCell>
-															<TableCell>
-																<div className='space-y-2'>
-																	<p className='t-style-link text-text-muted !font-bold'>
-																		{question.question}
-																	</p>
-																	<p className='t-style-caption text-text-muted !font-normal'>
-																		{question.description}
-																	</p>
-																</div>
-															</TableCell>
-															<TableCell className='px-4'>
-																<Button
-																	type='button'
-																	onClick={() =>
-																		handleAnswerChange(question.id, true)
-																	}
-																	className={`bg-accent border-border focus:ring-primary size-10 rounded-lg border transition-all focus:outline-none focus:ring-[0.5px] ${
-																		answer?.answer === true
-																			? 'border-primary bg-primary text-white'
-																			: 'hover:border-primary hover:bg-primary/5'
-																	}`}
-																	disabled={isSubmitting}
-																	title='Mark as Yes'
-																>
-																	<Check
-																		className={`mx-auto size-5 ${
+														return (
+															<TableRow
+																key={question.id}
+																className='border-border/40 dark:border-border'
+															>
+																<TableCell>
+																	<div className='bg-primary/10 text-primary t-style-caption flex h-8 w-8 items-center justify-center rounded-full !font-bold'>
+																		{question.order}
+																	</div>
+																</TableCell>
+																<TableCell>
+																	<div className='space-y-2'>
+																		<p className='t-style-link text-text-muted !font-bold'>
+																			{question.question}
+																		</p>
+																		<p className='t-style-caption text-text-muted !font-normal'>
+																			{question.description}
+																		</p>
+																	</div>
+																</TableCell>
+																<TableCell className='px-4'>
+																	<Button
+																		type='button'
+																		onClick={() =>
+																			handleAnswerChange(question.id, true)
+																		}
+																		className={`bg-accent border-border focus:ring-primary size-10 rounded-lg border transition-all focus:outline-none focus:ring-[0.5px] ${
 																			answer?.answer === true
-																				? 'text-white'
-																				: 'text-primary'
+																				? 'border-primary bg-primary text-white'
+																				: 'hover:border-primary hover:bg-primary/5'
 																		}`}
-																	/>
-																</Button>
-															</TableCell>
-															<TableCell className='px-4'>
-																<Button
-																	type='button'
-																	onClick={() =>
-																		handleAnswerChange(question.id, false)
-																	}
-																	className={`bg-accent border-border size-10 rounded-lg border transition-all focus:outline-none focus:ring-[0.5px] focus:ring-red-500 ${
-																		answer?.answer === false
-																			? 'border-red-500 bg-red-500 text-white'
-																			: 'hover:border-red-400 hover:bg-red-50'
-																	}`}
-																	disabled={isSubmitting}
-																	title='Mark as No'
-																>
-																	<X
-																		className={`mx-auto size-5 ${
-																			answer?.answer === false
-																				? 'text-white'
-																				: 'text-red-500'
-																		}`}
-																	/>
-																</Button>
-															</TableCell>
-															<TableCell className='px-4'>
-																<Button
-																	type='button'
-																	onClick={() =>
-																		handleAnswerChange(question.id, null)
-																	}
-																	className={`bg-accent border-border size-10 rounded-lg border transition-all focus:outline-none focus:ring-[0.5px] focus:ring-gray-400 ${
-																		answer?.answer === null
-																			? 'border-gray-500 bg-gray-500 text-white'
-																			: 'hover:border-gray-400 hover:bg-gray-50'
-																	}`}
-																	disabled={isSubmitting}
-																	title='Skip this question'
-																>
-																	<span
-																		className={`t-style-caption !font-bold ${
-																			answer?.answer === null
-																				? 'text-white'
-																				: 'text-gray-500'
-																		}`}
+																		disabled={isSubmitting}
+																		title='Mark as Yes'
 																	>
-																		N/A
-																	</span>
-																</Button>
-															</TableCell>
-														</TableRow>
-													);
-												})}
-											</TableBody>
-										</Table>
-									</div>
+																		<Check
+																			className={`mx-auto size-5 ${
+																				answer?.answer === true
+																					? 'text-white'
+																					: 'text-primary'
+																			}`}
+																		/>
+																	</Button>
+																</TableCell>
+																<TableCell className='px-4'>
+																	<Button
+																		type='button'
+																		onClick={() =>
+																			handleAnswerChange(question.id, false)
+																		}
+																		className={`bg-accent border-border size-10 rounded-lg border transition-all focus:outline-none focus:ring-[0.5px] focus:ring-red-500 ${
+																			answer?.answer === false
+																				? 'border-red-500 bg-red-500 text-white'
+																				: 'hover:border-red-400 hover:bg-red-50'
+																		}`}
+																		disabled={isSubmitting}
+																		title='Mark as No'
+																	>
+																		<X
+																			className={`mx-auto size-5 ${
+																				answer?.answer === false
+																					? 'text-white'
+																					: 'text-red-500'
+																			}`}
+																		/>
+																	</Button>
+																</TableCell>
+																<TableCell className='px-4'>
+																	<Button
+																		type='button'
+																		onClick={() =>
+																			handleAnswerChange(question.id, null)
+																		}
+																		className={`bg-accent border-border size-10 rounded-lg border transition-all focus:outline-none focus:ring-[0.5px] focus:ring-gray-400 ${
+																			answer?.answer === null
+																				? 'border-gray-500 bg-gray-500 text-white'
+																				: 'hover:border-gray-400 hover:bg-gray-50'
+																		}`}
+																		disabled={isSubmitting}
+																		title='Skip this question'
+																	>
+																		<span
+																			className={`t-style-caption !font-bold ${
+																				answer?.answer === null
+																					? 'text-white'
+																					: 'text-gray-500'
+																			}`}
+																		>
+																			N/A
+																		</span>
+																	</Button>
+																</TableCell>
+															</TableRow>
+														);
+													})}
+												</TableBody>
+											</Table>
+										</div>
+
+										{/* Card Layout for Medium and Smaller Devices */}
+										<div className='space-y-4 lg:hidden'>
+											{questions.map((question) => {
+												const answer = answers.find((a) => a.questionId === question.id);
+
+												return (
+													<Card
+														key={question.id}
+														className='bg-background border-border/40 rounded-lg border p-4 shadow-md'
+													>
+														<div className='mb-3 flex items-start gap-3'>
+															<div className='bg-primary/10 text-primary t-style-caption flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full !font-bold'>
+																{question.order}
+															</div>
+															<div className='flex-1 space-y-2'>
+																<h4 className='t-style-link text-text-muted !font-bold leading-tight'>
+																	{question.question}
+																</h4>
+																<p className='t-style-caption text-text-muted !font-normal leading-relaxed'>
+																	{question.description}
+																</p>
+															</div>
+														</div>
+
+														<div className='flex justify-center gap-3'>
+															<Button
+																type='button'
+																onClick={() => handleAnswerChange(question.id, true)}
+																className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-3 transition-all focus:outline-none focus:ring-[0.5px] ${
+																	answer?.answer === true
+																		? 'border-primary bg-primary focus:ring-primary text-white'
+																		: 'bg-accent border-border/40 dark:border-border focus:ring-primary'
+																}`}
+																disabled={isSubmitting}
+																title='Mark as Yes'
+															>
+																<Check className='size-4' />
+																<span className='t-style-link'>Yes</span>
+															</Button>
+
+															<Button
+																type='button'
+																onClick={() => handleAnswerChange(question.id, false)}
+																className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-3 transition-all focus:outline-none focus:ring-[0.5px] ${
+																	answer?.answer === false
+																		? 'border-red-500 bg-red-500 text-white focus:ring-red-500'
+																		: 'bg-accent border-border/40 dark:border-border focus:ring-red-500'
+																}`}
+																disabled={isSubmitting}
+																title='Mark as No'
+															>
+																<X className='size-4' />
+																<span className='t-style-link'>No</span>
+															</Button>
+
+															<Button
+																type='button'
+																onClick={() => handleAnswerChange(question.id, null)}
+																className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-3 transition-all focus:outline-none focus:ring-[0.5px] ${
+																	answer?.answer === null
+																		? 'border-gray-500 bg-gray-500 text-white focus:ring-gray-400'
+																		: 'bg-accent border-border/40 dark:border-border focus:ring-gray-400'
+																}`}
+																disabled={isSubmitting}
+																title='Skip this question'
+															>
+																<span className='t-style-link'>N/A</span>
+															</Button>
+														</div>
+													</Card>
+												);
+											})}
+										</div>
+									</>
 								) : (
-									<div className='text-muted-foreground py-12 text-center text-lg'>
+									<div className='text-text-muted t-style-caption py-12 text-center'>
 										<ClipboardCheck className='mx-auto mb-4 h-12 w-12 text-gray-400' />
 										No inspection questions available
 									</div>
