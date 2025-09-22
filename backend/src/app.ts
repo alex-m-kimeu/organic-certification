@@ -24,7 +24,7 @@ app.use(
 				scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://unpkg.com'],
 				imgSrc: ["'self'", 'data:', 'https:'],
 				fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
-				connectSrc: ["'self'"],
+				connectSrc: ["'self'", ...(process.env.API_BASE_URL ? [process.env.API_BASE_URL] : [])],
 				workerSrc: ["'self'", 'blob:'],
 			},
 		},
@@ -35,8 +35,10 @@ app.use(
 	cors({
 		origin:
 			process.env.NODE_ENV === 'production'
-				? process.env.ALLOWED_ORIGINS?.split(',')
-				: ['http://localhost:3000', 'http://localhost:3001'],
+				? (process.env.ALLOWED_ORIGINS?.split(',') || []).concat([
+						process.env.API_BASE_URL || 'https://your-domain.com',
+					])
+				: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:8080'],
 		credentials: true,
 		methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
 		allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
